@@ -137,7 +137,5 @@
         <file>images/icon/play.png</file>
         <file>images/icon/add.png</file>
         <file>images/icon/haro_icon.ico</file>
-        <file>images/appearance/body/ink_blue_body.png</file>
-        <file>images/appearance/body/light_green_body.png</file>
     </qresource>
 </RCC>

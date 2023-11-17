@@ -21,6 +21,7 @@
 #include"dresswin.h"
 #include"setwin.h"
 #include"musicwin.h"
+#include "db.h"
 
 using namespace std;
 
@@ -33,6 +34,8 @@ class Haro : public QMainWindow
     Q_OBJECT
 private:
     Ui::Haro *ui;
+
+    Db *db; //数据库
 
     DressWin *dressWindow;//换装窗口指针
 

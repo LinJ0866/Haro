@@ -13,6 +13,11 @@ Haro::Haro(QWidget *parent)
     setWindowFlags(m_flags|Qt::WindowStaysOnTopHint);//保持窗口置顶2
 
     int coordX,coordY;//桌面坐标
+
+    // 读取数据库
+    db = new Db;
+    db->connect();
+
     QFile file("./config.dat");
     file.open(QIODevice::ReadWrite);
     QDataStream in(&file);
@@ -98,7 +103,6 @@ void Haro::imageLoad()
 {
     //载入装扮图片
     body.push_back(QPixmap(QString(":/images/appearance/body/def_body.png")));
-    body.push_back(QPixmap(QString(":/images/appearance/body/light_green_body.png")));
     body.push_back(QPixmap(QString(":/images/appearance/body/blue_body.png")));
     body.push_back(QPixmap(QString(":/images/appearance/body/pink_body.png")));
     body.push_back(QPixmap(QString(":/images/appearance/body/icefire_body.png")));
