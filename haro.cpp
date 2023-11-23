@@ -419,7 +419,9 @@ void Haro::mouseMoveEvent(QMouseEvent *event)
         -btnSize*(btnSwitch_1+btnSwitch_2+1.5)/4-calenWindow->frameGeometry().width(),
         y()+frameGeometry().height()/2-size/5
         -calenWindow->frameGeometry().height()/2);
-        saveData();
+
+        this->updateConfigData("coordinate_x", x());
+        this->updateConfigData("coordinate_y", y());
     }
 }
 
@@ -525,12 +527,12 @@ void Haro::eyesMovement()
         if(bodyNum!=dressWindow->getBodyNum()){
             bodyNum = dressWindow->getBodyNum();
             bodyImage->setPixmap(body[bodyNum].scaled(size,size));
-            saveData();
+            this->updateConfigData("dress_head", bodyNum);
         }
         if(earsNum!=dressWindow->getEarsNum()){
             earsNum = dressWindow->getEarsNum();
             earsImage->setPixmap(ears1[earsNum].scaled(size,size));
-            saveData();
+            this->updateConfigData("dress_clothes", earsNum);
         }
     }
 
@@ -548,7 +550,7 @@ void Haro::eyesMovement()
                 stripeImage->hide();
             imageSet(earsImage,ears1[earsNum]);
 
-            saveData();
+            this->updateConfigData("scale", size);
             reInitBtn();
         }
     }
@@ -606,21 +608,10 @@ void Haro::loadConfigData() {
     coordY = configData["coordinate_y"].toInt();
     return;
 }
-// TODO: update configdata by key-value
+
+// 更新config
 void Haro::updateConfigData(QString key, int value) {
-
+    QHash<QString,QString> configData;
+    configData[key] = QString::number(value);
+    db->updateData("config", configData);
 }
-// TODO: remove
-void Haro::saveData()
-{
-    QFile file("./config.dat");
-    file.open(QIODevice::WriteOnly);
-    QDataStream out(&file);
-    out<<size<<bodyNum<<earsNum<<x()<<y();//存储体型、装扮编号参数、窗口坐标
-    file.close();
-}
-
-
-
-
-
