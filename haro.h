@@ -128,7 +128,6 @@ public:
 
     void specialMovement();//特殊动作事件
 
-    void saveData();
     void updateConfigData(QString key, int value); // 存储config数据
 };
 
