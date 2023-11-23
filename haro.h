@@ -2,19 +2,15 @@
 #define HARO_H
 
 #include <QMainWindow>
-#include<QMouseEvent>
-#include<QtGlobal>
+#include <QMouseEvent>
+#include <QtGlobal>
 #include <QLabel>
-#include<QPoint>
-#include<QTimer>
-#include<QPushButton>
-#include<QCalendarWidget>
-#include<QFile>
-#include<QDataStream>
-
-#include <QSqlDatabase>
-#include <QSqlError>
-#include <QSqlQuery>
+#include <QPoint>
+#include <QTimer>
+#include <QPushButton>
+#include <QCalendarWidget>
+#include <QFile>
+#include <QDataStream>
 
 #include<QSystemTrayIcon>
 
@@ -61,11 +57,12 @@ private:
 
     QTimer *timer;//定时器
 
+    void loadConfigData(); // 加载config数据
+
     int size;//体型大小
-
     int btnSize;//按钮大小
-
     int bodyNum,earsNum;//身体和耳朵对应装扮序号
+    int coordX,coordY;//桌面坐标
 
     int face;//表情序号
 
@@ -131,8 +128,8 @@ public:
 
     void specialMovement();//特殊动作事件
 
-    void saveData();//存储数据
-
+    void saveData();
+    void updateConfigData(QString key, int value); // 存储config数据
 };
 
 
