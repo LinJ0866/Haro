@@ -39,6 +39,7 @@
 # usr configurations
 *.usr
 *.user
+*.pro.user
 *.pro.user.*
 *.orig
 *.autosave
