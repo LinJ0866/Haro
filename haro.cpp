@@ -12,25 +12,26 @@ Haro::Haro(QWidget *parent)
     Qt::WindowFlags m_flags = windowFlags();//保持窗口置顶1
     setWindowFlags(m_flags|Qt::WindowStaysOnTopHint);//保持窗口置顶2
 
-    int coordX,coordY;//桌面坐标
-
     // 读取数据库
     db = new Db;
     db->connect();
 
-    QFile file("./config.dat");
-    file.open(QIODevice::ReadWrite);
-    QDataStream in(&file);
-    if(file.isOpen())//读取体型、装扮编号参数、相对桌面坐标
-        in>>size>>bodyNum>>earsNum>>coordX>>coordY;
-    else{
-        size = 200;
-        bodyNum = 0;
-        earsNum = 0;
-        coordX = x();
-        coordY = y();
-    }
-    file.close();
+    this->loadConfigData();
+
+//    QFile file("./config.dat");
+//    file.open(QIODevice::ReadWrite);
+//    QDataStream in(&file);
+//    if(file.isOpen()) {  //读取体型、装扮编号参数、相对桌面坐标
+//        in>>size>>bodyNum>>earsNum>>coordX>>coordY;
+//    }
+//    else{
+//        size = 200;
+//        bodyNum = 0;
+//        earsNum = 0;
+//        coordX = x();
+//        coordY = y();
+//    }
+//    file.close();
     move(coordX,coordY);
 
     timer = new QTimer;
@@ -585,6 +586,31 @@ void Haro::specialMovement(){
     flag++;
 }
 
+
+void Haro::loadConfigData() {
+    QHash<QString,QString> configData;
+    db->getData("config", configData);
+    if (configData.empty()) {
+        configData["scale"] = "100";
+        configData["dress_head"] = "0";
+        configData["dress_clothes"] = "0";
+        configData["coordinate_x"] = "0";
+        configData["coordinate_y"] = "400";
+
+        db->addData("config", configData);
+    }
+    size = configData["scale"].toInt();
+    bodyNum = configData["dress_head"].toInt();
+    earsNum = configData["dress_clothes"].toInt();
+    coordX = configData["coordinate_x"].toInt();
+    coordY = configData["coordinate_y"].toInt();
+    return;
+}
+// TODO: update configdata by key-value
+void Haro::updateConfigData(QString key, int value) {
+
+}
+// TODO: remove
 void Haro::saveData()
 {
     QFile file("./config.dat");
