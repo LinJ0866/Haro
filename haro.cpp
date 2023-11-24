@@ -145,7 +145,7 @@ void Haro::initBtn()
 
 
     //设置按钮样式
-    setStyleSheet("QPushButton{border:3px solid rgb(47, 82, 143);background-color:rgb(170,200,255);}"
+    setStyleSheet("QPushButton{border:3px solid rgb(47, 82, 143);background-color:rgb(200,210,255);}"
                   "QPushButton::hover{background-color:rgb(170,200,255);}"
                   "QPushButton:pressed{background-color:rgb(60,70,200);}");
     reInitBtn();
@@ -180,7 +180,7 @@ void Haro::initBtn()
 }
 void Haro::renderBtn() {
     QString stableStyle = {
-        "QPushButton{border:%1px solid rgb(47, 82, 143);background-color:rgb(170,200,255);border-radius: %2px;}"
+        "QPushButton{border:%1px solid rgb(47, 82, 143);background-color:rgb(200,210,255);border-radius: %2px;}"
         "QPushButton::hover{background-color:rgb(170,200,255);}"
         "QPushButton:pressed{background-color:rgb(60,70,200);}"
     };
@@ -248,20 +248,35 @@ void Haro::reInitBtn()
 
 }
 
+// systemTray：托盘、通知
 void Haro::initSystemTray()
 {
 
     pSystemTray = new QSystemTrayIcon(this);
     pSystemTray->setIcon(QIcon(":/assets/icons/haro_icon.ico"));
     pSystemTray->setToolTip("你好，我是学术妲己Haro~");
+
+    // 托盘菜单
+    QAction *menuDisplay = new QAction("显示Haro", this);
+    QAction *menuRestore = new QAction("重置位置（找不到Haro时点击这个）", this);
+    QAction *menuExit = new QAction("退出", this);
+    connect(menuDisplay, &QAction::triggered, this, &Haro::systemTrayPush);
+    connect(menuRestore, &QAction::triggered, this, &Haro::restorePosition);
+    connect(menuExit, &QAction::triggered, this, &Haro::closeBtnPush);
+
+    QMenu *menu = new QMenu(this);
+    menu->addAction(menuDisplay);
+    menu->addAction(menuRestore);
+    menu->addAction(menuExit);
+    pSystemTray->setContextMenu(menu);
+
     pSystemTray->show();
     connect(pSystemTray,&QSystemTrayIcon::activated,this,&Haro::systemTrayPush);
-
 }
 
+// 关闭
 void Haro::closeBtnPush()
 {
-
    dressWindow->close();
    setWindow->close();
    musicWindow->close();
@@ -269,6 +284,41 @@ void Haro::closeBtnPush()
 
    this->close();
 
+}
+
+// 最小化
+void Haro::minBtnPush()
+{
+    this->hide();
+    dressWindow->hide();
+    calenWindow->hide();
+    setWindow->hide();
+    musicWindow->hide();
+
+    pSystemTray->showMessage("Haro", "已最小化在托盘显示", QSystemTrayIcon::NoIcon, 1000);
+
+    btnSwitch_1=0;
+    btnSwitch_2=0;
+    btnSwitchRole();
+
+}
+
+// 从最小化窗口恢复
+void Haro::systemTrayPush()
+{
+    if(this->isHidden())
+        this->show();
+
+}
+
+void Haro::restorePosition() {
+    move(0, -400);
+    updateConfigData("coordinate_x", 0);
+    updateConfigData("coordinate_y", -400);
+
+    pSystemTray->showMessage("Haro", "已恢复至默认位置", QSystemTrayIcon::NoIcon, 1000);
+
+    this->systemTrayPush();
 }
 
 void Haro::dressBtnPush()
@@ -300,20 +350,6 @@ void Haro::moreBtnPush()
     dressWindow->hide();
 }
 
-void Haro::minBtnPush()
-{
-    //this->setWindowState(Qt::WindowMinimized);//最小化窗口（已弃用）
-    this->hide();
-    dressWindow->hide();
-    calenWindow->hide();
-    setWindow->hide();
-    musicWindow->hide();
-
-    btnSwitch_1=0;
-    btnSwitch_2=0;
-    btnSwitchRole();
-
-}
 
 void Haro::setBtnPush()
 {
@@ -385,14 +421,6 @@ void Haro::calenBtnPush()
     }
     else
         calenWindow->hide();
-}
-
-void Haro::systemTrayPush()
-{
-
-    if(this->isHidden())
-        this->show();
-
 }
 
 void Haro::btnSwitchRole()
