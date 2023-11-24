@@ -11,8 +11,7 @@
 #include <QCalendarWidget>
 #include <QFile>
 #include <QDataStream>
-
-#include<QSystemTrayIcon>
+#include <QSystemTrayIcon>
 
 #include"dresswin.h"
 #include"setwin.h"
@@ -34,18 +33,13 @@ private:
     Db *db; //数据库
 
     DressWin *dressWindow;//换装窗口指针
-
     SetWin *setWindow;//设置窗口指针
-
-    MusicWin *musicWindow;//音乐窗口页面指针
-
-    QCalendarWidget *calenWindow;//日历窗口指针
 
     QPoint moveLeftTop;//坐标点
 
     vector<QPixmap> movement;//表情图片容器
-
     vector<QPixmap> spMovement;//特殊动作图片容器
+    vector<QPixmap> flyMovement;//拖动动作图片容器
 
     vector<int>faceNum;//每个表情对应帧数与起始位置
 
@@ -75,23 +69,27 @@ private:
     int spMove;//特殊动作序号
 
     int btnSwitch_1,btnSwitch_2;//菜单按钮显示开关
+    int draggingCount = 0;
+    int flyMove=0;
+
     QPushButton *closeBtn;//关闭按钮
     QPushButton *dressBtn;//换装按钮
-    QPushButton *moreBtn;//展开更多按钮
     QPushButton *minBtn;//最小化按钮
     QPushButton *setBtn;//设置按钮
-    QPushButton *musicBtn;//音乐按钮
-    QPushButton *gameBtn;//游戏按钮
-    QPushButton *calenBtn;//日历按钮
 
     QSystemTrayIcon* pSystemTray;//系统托盘
+
+    void mouseMoveEvent(QMouseEvent *event); //鼠标移动事件-虚函数
+    void mousePressEvent(QMouseEvent *event); //鼠标点击事件-虚函数
+    void mouseReleaseEvent(QMouseEvent *event); //鼠标释放时间-虚函数
+
+    void hideMenuBtns();
+    void hideMenuBtns(int status);
 public:
     Haro(QWidget *parent = nullptr);
     ~Haro();  
 
-    void mouseMoveEvent(QMouseEvent *event);//鼠标移动事件-虚函数
 
-    void mousePressEvent(QMouseEvent *event);//鼠标点击事件-虚函数
 
     void eyesMovementLoad();//眼部动作载入
 
@@ -107,33 +105,27 @@ public:
     void renderBtn(); //渲染按钮
 
     void initSystemTray();//初始化系统托盘
+    void restoreWindows();
 
     void closeBtnPush();//点击关闭按钮事件
-
     void dressBtnPush();//点击装扮按钮事件
-
-    void moreBtnPush();//点击最展开更多按钮事件
-
     void minBtnPush();//点击最小化按钮事件
-
     void setBtnPush();//点击设置按钮事件
-
-    void musicBtnPush();//点击设置按钮事件
-
-    void gameBtnPush();//点击游戏按钮事件
-
-    void calenBtnPush();//点击日历按钮事件
-
-    void systemTrayPush();//点击系统托盘事件
 
     void btnSwitchRole();//根据btnSwitch切换按钮状态
 
     void specialMovementLoad();//特殊动作载入
+    void flyMovementLoad();//拖动动作载入
 
     void specialMovement();//特殊动作事件
 
     void updateConfigData(QString key, int value); // 存储config数据
     void restorePosition();
+public slots:
+    void systemTrayPush(QSystemTrayIcon::ActivationReason reason);//点击系统托盘事件
+
+    void updateDressing(QString key, int value);
+    void updateSize(int value);
 };
 
 
