@@ -12,11 +12,16 @@ Haro::Haro(QWidget *parent)
     Qt::WindowFlags m_flags = windowFlags();//保持窗口置顶1
     setWindowFlags(m_flags|Qt::WindowStaysOnTopHint);//保持窗口置顶2
 
+    initBtn();//初始化按钮
+
     // 读取数据库
     db = new Db;
     db->connect();
 
     this->loadConfigData();
+
+    move(coordX,coordY);
+    this->renderBtn(); // 渲染按钮
 
     timer = new QTimer;
     timer->start(40);//动画速度
@@ -33,25 +38,22 @@ Haro::Haro(QWidget *parent)
     stripeImage = new QLabel(this);//屏幕遮盖条纹图片指针
     earsImage = new QLabel(this);//耳朵图片指针
 
+    // 加载外观
     imageSet(bodyImage,body[bodyNum]);
-
     imageSet(eyesImage,eyes);
-
     if(size>140){
         imageSet(stripeImage,stripe);
         stripeImage->show();
     }
     else
         stripeImage->hide();
-
     imageSet(earsImage,ears1[earsNum]);
 
-    initBtn();//初始化按钮
+
     initSystemTray();//初始化系统托盘
 
     dressWindow = new DressWin();
-    setWindow = new SetWin;
-
+    setWindow = new SetWin();
     connect(dressWindow, SIGNAL(dressSignal(QString, int)), this, SLOT(updateDressing(QString, int)));
     connect(setWindow, SIGNAL(sizeSignal(int)), this, SLOT(updateSize(int)));
 }
@@ -65,11 +67,6 @@ Haro::~Haro()
     delete bodyImage;
     delete eyesImage;
     delete stripeImage;
-
-    delete closeBtn;
-    delete dressBtn;
-    delete minBtn;
-    delete setBtn;
 }
 
 void Haro::imageSet(QLabel *image,QPixmap map)
@@ -125,43 +122,13 @@ void Haro::initBtn()
 
     // 固定按钮加载
     btns[0]->setIcon(QIcon(":/assets/icons/close.png"));
+    btns[0]->setObjectName("m001");
+    btns[0]->setToolTip("退出");
     btns[5]->setIcon(QIcon(":/assets/icons/more.png"));
-    connect(btns[0], &QPushButton::clicked, this, &Haro::closeBtnPush);
-
-
-    // TODO: 主菜单自定义按钮加载
-
-    // 渲染
-    this->renderBtn();
-
-    // 以下即将废弃
-    closeBtn = new QPushButton(this);//关闭按钮
-    dressBtn = new QPushButton(this);//换装按钮
-    minBtn = new QPushButton(this);//最小化按钮
-    setBtn = new QPushButton(this);//设置按钮
-
-
-    closeBtn->setIcon(QIcon(":/images/icon/close.png"));
-    dressBtn->setIcon(QIcon(":/images/icon/dress.png"));
-    minBtn->setIcon(QIcon(":/images/icon/min.png"));
-    setBtn->setIcon(QIcon(":/images/icon/setting.png"));
-
-
-    //设置按钮样式
-    setStyleSheet("QPushButton{border:3px solid rgb(47, 82, 143);background-color:rgb(200,210,255);border-radius: 10px;}"
-                  "QPushButton::hover{background-color:rgb(170,200,255);}"
-                  "QPushButton:pressed{background-color:rgb(60,70,200);}");
-    reInitBtn();
-
-    //连接按钮信号与对应槽函数
-    connect(closeBtn,&QPushButton::clicked,this,&Haro::closeBtnPush);
-    connect(dressBtn,&QPushButton::clicked,this,&Haro::dressBtnPush);
-    connect(minBtn,&QPushButton::clicked,this,&Haro::minBtnPush);
-    connect(setBtn,&QPushButton::clicked,this,&Haro::setBtnPush);
-
-    btnSwitch_1 = 0;//初始化按钮显示
-    btnSwitch_2 = 0;
-    btnSwitchRole();
+    btns[5]->setObjectName("m002");
+    btns[5]->setToolTip("更多（开发中）");
+    connect(btns[0], &QPushButton::clicked, this, &Haro::onBtnsClick);
+    connect(btns[5], &QPushButton::clicked, this, &Haro::onBtnsClick);
 }
 void Haro::renderBtn() {
     QString stableStyle = {
@@ -197,42 +164,11 @@ void Haro::renderBtn() {
         }
     }
 }
-void Haro::reInitBtn()
-{
-    btnSize = size;
-
-   // if(btnSize > 650)//限制按钮大小
-    //    btnSize = 650;
-    if(btnSize < 300)//限制按钮大小
-         btnSize = 300;
-    //按钮的坐标和大小参数
-    int btnX = this->frameGeometry().width()/2 - btnSize*3/5-5;
-    int btnY = this->frameGeometry().height()/2 - btnSize/4;
-    int btnWidth = btnSize/5;
-    int btnHeight = btnSize/8;
-
-    closeBtn->setGeometry(btnX,btnY,btnWidth,btnHeight);
-    dressBtn->setGeometry(btnX,btnY + btnSize/6,btnWidth,btnHeight);
-    setBtn->setGeometry(btnX,btnY + 2*btnSize/6,btnWidth,btnHeight);
-    minBtn->setGeometry(btnX,btnY + 3*btnSize/6,btnWidth,btnHeight);
-
-    //图标大小
-    QSize temp(btnSize/8,btnSize/8);
-    closeBtn->setIconSize(temp);
-    dressBtn->setIconSize(temp);
-    minBtn->setIconSize(temp);
-    setBtn->setIconSize(temp);
-
-}
 
 void Haro::hideMenuBtns() {
     if (btnStatus % 2) { // 若为奇数，则当前为显示状态，需-1隐藏
         this->btnStatus -= 1;
         this->renderBtn();
-
-        btnSwitch_1=0;
-        btnSwitch_2=0;
-        btnSwitchRole();
     }
 }
 
@@ -240,17 +176,10 @@ void Haro::hideMenuBtns(int status) {
     if (status != 1) return;
     if (btnStatus % 2) { // 若为奇数，则当前为显示状态，需-1隐藏
         this->btnStatus -= 1;
-
-
-        btnSwitch_1=0;
-        btnSwitch_2=0;
     } else {
         this->btnStatus += 1;
-
-        btnSwitch_1=1;
     }
     this->renderBtn();
-    btnSwitchRole();
 }
 
 
@@ -288,10 +217,26 @@ void Haro::restoreWindows() {
     }
 }
 
+// 动态按钮响应
+void Haro::onBtnsClick() {
+    QPushButton* btn = static_cast<QPushButton*>(QObject::sender());
+    QString btn_name = btn->objectName();
+
+    if (btn_name == "m001") {
+        this->closeBtnPush();
+    } else if(btn_name == "m101") {
+        this->dressBtnPush();
+    } else if (btn_name == "m102") {
+        this->setBtnPush();
+    } else {
+        pSystemTray->showMessage(btn->toolTip(), "功能开发中", QSystemTrayIcon::NoIcon, 100);
+    }
+}
+
 // 关闭
 void Haro::closeBtnPush()
 {
-   QApplication::exit(0);
+    QApplication::exit(0);
 }
 
 // 最小化
@@ -355,15 +300,6 @@ void Haro::setBtnPush()
 
 //    this->show();
 //}
-
-void Haro::btnSwitchRole()
-{
-    //根据btnSwitch调整按钮是否显示
-    closeBtn->setVisible(btnSwitch_1);
-    dressBtn->setVisible(btnSwitch_1);
-    minBtn->setVisible(btnSwitch_1);
-    setBtn->setVisible(btnSwitch_1);
-}
 
 void Haro::mouseMoveEvent(QMouseEvent *event)
 {
@@ -536,7 +472,9 @@ void Haro::specialMovement(){
 
 void Haro::loadConfigData() {
     QHash<QString,QString> configData;
+    QHash<QString,QString> btnData;
     db->getData("config", configData);
+    // TODO：统一管理初始化
     if (configData.empty()) {
         configData["scale"] = "100";
         configData["dress_head"] = "0";
@@ -546,13 +484,23 @@ void Haro::loadConfigData() {
 
         db->addData("config", configData);
     }
+
     size = configData["scale"].toInt();
     bodyNum = configData["dress_head"].toInt();
     earsNum = configData["dress_clothes"].toInt();
     coordX = configData["coordinate_x"].toInt();
     coordY = configData["coordinate_y"].toInt();
 
-    move(coordX,coordY);
+    // 菜单按钮动态加载
+    for(int i=0; i<4; i++) {
+        db->getData("buttons", btnData, "where b_id == "+configData["button"+QString::number(i+1)+"_id"]);
+
+        btns[menuBtnIdxs[i]]->setObjectName("m"+btnData["function_id"]);
+        btns[menuBtnIdxs[i]]->setIcon(QIcon(btnData["icon_url"]));
+        btns[menuBtnIdxs[i]]->setToolTip(btnData["name"]);
+        connect(btns[menuBtnIdxs[i]], &QPushButton::clicked, this, &Haro::onBtnsClick);
+    }
+
     return;
 }
 
@@ -587,6 +535,5 @@ void Haro::updateSize(int value) {
         stripeImage->hide();
     imageSet(earsImage,ears1[earsNum]);
     this->updateConfigData("scale", value);
-    reInitBtn();
     renderBtn();
 }

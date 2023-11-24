@@ -63,19 +63,12 @@ private:
     QList<QHash<QString, QString>> menu_btns;
 
     int face;//表情序号
-
     int faceSum;//表情数量
 
     int spMove;//特殊动作序号
 
-    int btnSwitch_1,btnSwitch_2;//菜单按钮显示开关
     int draggingCount = 0;
     int flyMove=0;
-
-    QPushButton *closeBtn;//关闭按钮
-    QPushButton *dressBtn;//换装按钮
-    QPushButton *minBtn;//最小化按钮
-    QPushButton *setBtn;//设置按钮
 
     QSystemTrayIcon* pSystemTray;//系统托盘
 
@@ -85,14 +78,16 @@ private:
 
     void hideMenuBtns();
     void hideMenuBtns(int status);
+    void refreshAppearence();
+    void refreshAppearence(QString name);
+
+    void onBtnsClick();
+    QList<int> menuBtnIdxs = {4,2,1,3};
 public:
     Haro(QWidget *parent = nullptr);
     ~Haro();  
 
-
-
     void eyesMovementLoad();//眼部动作载入
-
     void eyesMovement();//眼部动作表情
 
     inline void imageSet(QLabel *image,QPixmap map);//设置各部位图片
@@ -100,8 +95,6 @@ public:
     void imageLoad();//各部位图片载入
 
     void initBtn();//初始化按钮
-
-    void reInitBtn();//修改大小时再次初始化按钮
     void renderBtn(); //渲染按钮
 
     void initSystemTray();//初始化系统托盘
@@ -111,8 +104,6 @@ public:
     void dressBtnPush();//点击装扮按钮事件
     void minBtnPush();//点击最小化按钮事件
     void setBtnPush();//点击设置按钮事件
-
-    void btnSwitchRole();//根据btnSwitch切换按钮状态
 
     void specialMovementLoad();//特殊动作载入
     void flyMovementLoad();//拖动动作载入
@@ -128,8 +119,4 @@ public slots:
     void updateSize(int value);
 };
 
-
-
-
 #endif // HARO_H
-
