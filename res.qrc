@@ -137,5 +137,13 @@
         <file>images/icon/play.png</file>
         <file>images/icon/add.png</file>
         <file>images/icon/haro_icon.ico</file>
+        <file>assets/icons/cabinet.png</file>
+        <file>assets/icons/calendar.png</file>
+        <file>assets/icons/close.png</file>
+        <file>assets/icons/management.png</file>
+        <file>assets/icons/more.png</file>
+        <file>assets/icons/star.png</file>
+        <file>assets/icons/work.png</file>
+        <file>assets/icons/haro_icon.ico</file>
     </qresource>
 </RCC>

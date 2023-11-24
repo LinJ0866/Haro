@@ -18,22 +18,6 @@ Haro::Haro(QWidget *parent)
 
     this->loadConfigData();
 
-//    QFile file("./config.dat");
-//    file.open(QIODevice::ReadWrite);
-//    QDataStream in(&file);
-//    if(file.isOpen()) {  //读取体型、装扮编号参数、相对桌面坐标
-//        in>>size>>bodyNum>>earsNum>>coordX>>coordY;
-//    }
-//    else{
-//        size = 200;
-//        bodyNum = 0;
-//        earsNum = 0;
-//        coordX = x();
-//        coordY = y();
-//    }
-//    file.close();
-    move(coordX,coordY);
-
     timer = new QTimer;
     timer->start(40);//动画速度
     connect(timer,&QTimer::timeout,this,&Haro::eyesMovement);//关联眼部动作
@@ -145,6 +129,11 @@ void Haro::initBtn()
     gameBtn = new QPushButton(this);//游戏按钮
     calenBtn = new QPushButton(this);//日历按钮
 
+    for (int i = 0; i < 6; i++) {
+        btns<<new QPushButton(this);
+    }
+    btns[0]->setIcon(QIcon(":/assets/icons/close.png"));
+
     closeBtn->setIcon(QIcon(":/images/icon/close.png"));
     dressBtn->setIcon(QIcon(":/images/icon/dress.png"));
     moreBtn->setIcon(QIcon(":/images/icon/more.png"));
@@ -154,14 +143,13 @@ void Haro::initBtn()
     gameBtn->setIcon(QIcon(":/images/icon/game.png"));
     calenBtn->setIcon(QIcon(":/images/icon/calendar.png"));
 
-    reInitBtn();
 
     //设置按钮样式
-    setStyleSheet("QPushButton{border:4px solid black;"
-                  "background-color:rgb(200,210,255);border-radius: 10px;}"
+    setStyleSheet("QPushButton{border:3px solid rgb(47, 82, 143);background-color:rgb(170,200,255);}"
                   "QPushButton::hover{background-color:rgb(170,200,255);}"
                   "QPushButton:pressed{background-color:rgb(60,70,200);}");
-
+    reInitBtn();
+    this->renderBtn();
     dressWindow = new DressWin;//换装窗口
     dressWindow->accept(body,ears1,bodyNum,earsNum);
 
@@ -190,7 +178,40 @@ void Haro::initBtn()
     btnSwitch_2 = 0;
     btnSwitchRole();
 }
+void Haro::renderBtn() {
+    QString stableStyle = {
+        "QPushButton{border:%1px solid rgb(47, 82, 143);background-color:rgb(170,200,255);border-radius: %2px;}"
+        "QPushButton::hover{background-color:rgb(170,200,255);}"
+        "QPushButton:pressed{background-color:rgb(60,70,200);}"
+    };
+    QString stableStyleClose = {
+        "QPushButton{border:%1px solid rgb(47, 82, 143);background-color:rgb(93,151,255);border-radius: %2px;}"
+        "QPushButton::hover{background-color:rgb(170,200,255);}"
+        "QPushButton:pressed{background-color:rgb(60,70,200);}"
+    };
+    btnSize = size<510?size/3:170;
+    int btnX = this->frameGeometry().width()/2-btnSize/2;
+    int btnY = this->frameGeometry().height()/2+size/2;
+    int btnX_relative[5] = {0, int(-btnSize*1.2), int(+btnSize*1.2), int(-btnSize*2.2), int(+btnSize*2.2)};
+    int btnY_relative[5] = {0, int(-btnSize*0.2), int(-btnSize*0.2), int(-btnSize*0.8), int(-btnSize*0.8)};
+    QSize iconsize(btnSize/2,btnSize/2);
 
+    // 关闭按钮
+    btns[0]->setStyleSheet(stableStyleClose.arg(btnSize/10).arg(btnSize/2));
+    btns[0]->setGeometry(this->frameGeometry().width()/2+size/2,this->frameGeometry().height()/2-size/1.7,btnSize,btnSize);
+    btns[0]->setIconSize(iconsize);
+    btns[0]->setVisible(btnStatus%2);
+
+    // 主菜单
+    if (btnStatus < 2) {
+        for (int i = 1; i < 6; i++) {
+            btns[i]->setStyleSheet(stableStyle.arg(btnSize/10).arg(btnSize/2));
+            btns[i]->setGeometry(btnX+btnX_relative[i-1], btnY+btnY_relative[i-1], btnSize, btnSize);
+            btns[i]->setIconSize(iconsize);
+            btns[i]->setVisible(btnStatus%2);
+        }
+    }
+}
 void Haro::reInitBtn()
 {
     btnSize = size;
@@ -203,7 +224,7 @@ void Haro::reInitBtn()
     int btnX = this->frameGeometry().width()/2 - btnSize*3/5-5;
     int btnY = this->frameGeometry().height()/2 - btnSize/4;
     int btnWidth = btnSize/5;
-    int btnHeight = btnSize/8;
+    int btnHeight = btnSize/5;
 
     closeBtn->setGeometry(btnX,btnY,btnWidth,btnHeight);
     dressBtn->setGeometry(btnX,btnY + btnSize/6,btnWidth,btnHeight);
@@ -231,8 +252,8 @@ void Haro::initSystemTray()
 {
 
     pSystemTray = new QSystemTrayIcon(this);
-    pSystemTray->setIcon(QIcon(":/images/icon/haro_icon.ico"));
-    pSystemTray->setToolTip("Hello, I'm Haro.");
+    pSystemTray->setIcon(QIcon(":/assets/icons/haro_icon.ico"));
+    pSystemTray->setToolTip("你好，我是学术妲己Haro~");
     pSystemTray->show();
     connect(pSystemTray,&QSystemTrayIcon::activated,this,&Haro::systemTrayPush);
 
@@ -441,15 +462,23 @@ void Haro::mousePressEvent(QMouseEvent *event)
     }
  }
  else if(event->button() == Qt::RightButton){//鼠标右键事件
-     if(btnSwitch_1){//隐藏按钮
-         btnSwitch_1=0;
-         btnSwitch_2=0;
-     }
-     else
-         btnSwitch_1=1;//显示按钮
+    if (btnStatus % 2) { // 若为奇数，则当前为显示状态，需-1隐藏
+        this->btnStatus -= 1;
+    } else {
+        this->btnStatus += 1;
+    }
 
-   dressWindow->hide();
+    // 准备废弃
+    if(btnSwitch_1){//隐藏按钮
+        btnSwitch_1=0;
+        btnSwitch_2=0;
+    }
+    else
+        btnSwitch_1=1;//显示按钮
     btnSwitchRole();
+
+    dressWindow->hide();
+    this->renderBtn(); // 重新渲染按钮
  }
 
 
@@ -552,6 +581,7 @@ void Haro::eyesMovement()
 
             this->updateConfigData("scale", size);
             reInitBtn();
+            renderBtn();
         }
     }
     if(spMove>-1)//特殊动作
@@ -597,7 +627,7 @@ void Haro::loadConfigData() {
         configData["dress_head"] = "0";
         configData["dress_clothes"] = "0";
         configData["coordinate_x"] = "0";
-        configData["coordinate_y"] = "400";
+        configData["coordinate_y"] = "-400";
 
         db->addData("config", configData);
     }
@@ -606,6 +636,10 @@ void Haro::loadConfigData() {
     earsNum = configData["dress_clothes"].toInt();
     coordX = configData["coordinate_x"].toInt();
     coordY = configData["coordinate_y"].toInt();
+
+    // TODO: 更合适的button信息加载
+
+    move(coordX,coordY);
     return;
 }
 

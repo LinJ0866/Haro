@@ -64,6 +64,10 @@ private:
     int bodyNum,earsNum;//身体和耳朵对应装扮序号
     int coordX,coordY;//桌面坐标
 
+    QList<QPushButton*> btns;
+    int btnStatus=0; //按钮显示状态  0：主菜单隐藏 1：主菜单显示
+    QList<QHash<QString, QString>> menu_btns;
+
     int face;//表情序号
 
     int faceSum;//表情数量
@@ -71,7 +75,6 @@ private:
     int spMove;//特殊动作序号
 
     int btnSwitch_1,btnSwitch_2;//菜单按钮显示开关
-
     QPushButton *closeBtn;//关闭按钮
     QPushButton *dressBtn;//换装按钮
     QPushButton *moreBtn;//展开更多按钮
@@ -101,6 +104,7 @@ public:
     void initBtn();//初始化按钮
 
     void reInitBtn();//修改大小时再次初始化按钮
+    void renderBtn(); //渲染按钮
 
     void initSystemTray();//初始化系统托盘
 
