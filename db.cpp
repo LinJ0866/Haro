@@ -11,9 +11,16 @@ Db::Db()
 void Db::checkAndCreateTables()
 {
     QSqlQuery sql_query;
-    QStringList table_name = {"config"};
+    QStringList table_name = {"config", "buttons"};
     QStringList create_sqls = {
-        "create table IF NOT EXISTS config (coordinate_x int, coordinate_y int, scale int, dress_head int, dress_clothes int, button1_id uint64, button2_id uint64, button3_id uint64, button4_id uint64)"
+        "create table IF NOT EXISTS config (coordinate_x int, coordinate_y int, scale int, dress_head int, dress_clothes int, button1_id INTEGER, button2_id INTEGER, button3_id INTEGER, button4_id INTEGER)",
+        "create table IF NOT EXISTS buttons ("
+                "b_id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                "icon_url string,"
+                "name string,"
+                "function_id int,"
+                "is_delete int"
+        ")"
     };
     for(int i = 0;i < create_sqls.size(); i++) {
         this->queryExec(create_sqls[i]);
