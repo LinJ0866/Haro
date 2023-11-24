@@ -145,5 +145,7 @@
         <file>assets/icons/star.png</file>
         <file>assets/icons/work.png</file>
         <file>assets/icons/haro_icon.ico</file>
+        <file>assets/icons/dress.png</file>
+        <file>assets/icons/setting.png</file>
     </qresource>
 </RCC>
