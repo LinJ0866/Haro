@@ -22,10 +22,9 @@ public:
     void setSize(int);//设置size值
 
     int getSize();//外部获取size值
-
+signals:
+    void sizeSignal(int value);
 private slots:
-
-
     void on_sizeSlider_valueChanged(int value);//滑动条槽函数
 
 private:

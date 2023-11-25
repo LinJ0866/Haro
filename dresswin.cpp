@@ -7,15 +7,16 @@ DressWin::DressWin(QWidget *parent) :
 {
 
     ui->setupUi(this);
+    this->setAttribute(Qt::WA_QuitOnClose, false);
 
-    QBitmap bmp(this->size());//设置圆角边框
-    bmp.fill();
-    QPainter p(&bmp);
-    p.setPen(Qt::NoPen);
-    p.setBrush(Qt::black);
-    p.drawRoundedRect(bmp.rect(),50,50);
-    setMask(bmp);
-    setWindowOpacity(0.95);//设置透明度
+//    QBitmap bmp(this->size());//设置圆角边框
+//    bmp.fill();
+//    QPainter p(&bmp);
+//    p.setPen(Qt::NoPen);
+//    p.setBrush(Qt::black);
+//    p.drawRoundedRect(bmp.rect(),50,50);
+//    setMask(bmp);
+//    setWindowOpacity(0.95);//设置透明度
     setStyleSheet("background-color:white;");
 
     Qt::WindowFlags m_flags = windowFlags();//保持窗口置顶1
@@ -80,12 +81,12 @@ void DressWin::wheelEvent(QWheelEvent *event)
 
 void DressWin::bodyChange(int id)
 {
-    bodyNum = id;
+    emit dressSignal("head", id);
 }
 
 void DressWin::earsChange(int id)
 {
-    earsNum = id;
+    emit dressSignal("clothes", id);
 }
 
 int DressWin::getBodyNum()

@@ -16,8 +16,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 QT += multimedia
+QT += sql
 
 SOURCES += \
+    db.cpp \
     dresswin.cpp \
     main.cpp \
     haro.cpp \
@@ -25,6 +27,7 @@ SOURCES += \
     setwin.cpp
 
 HEADERS += \
+    db.h \
     dresswin.h \
     haro.h \
     musicwin.h \

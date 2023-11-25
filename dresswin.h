@@ -21,13 +21,16 @@ class DressWin : public QWidget
     Q_OBJECT
 
 public:
-    explicit DressWin(QWidget *parent = nullptr);
+    explicit DressWin(QWidget *parent = 0);
     void accept(vector<QPixmap>& body,vector<QPixmap>& ears,int bodyNum,int earsNum);
     ~DressWin();
     void paintEvent(QPaintEvent *);//绘画事件
     void wheelEvent(QWheelEvent *event);//鼠标滚轮事件
     int getBodyNum();//返回对应装扮序号
     int getEarsNum();
+
+signals:
+    void dressSignal(QString key, int value);
 private:
     void bodyChange(int);//槽函数-点击按钮切换对应装扮序号
     void earsChange(int);
