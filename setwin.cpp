@@ -6,15 +6,16 @@ SetWin::SetWin(QWidget *parent) :
     ui(new Ui::SetWin)
 {
     ui->setupUi(this);
+    this->setAttribute(Qt::WA_QuitOnClose, false);
 
-    QBitmap bmp(this->size());//设置圆角边框
-    bmp.fill();
-    QPainter p(&bmp);
-    p.setPen(Qt::NoPen);
-    p.setBrush(Qt::black);
-    p.drawRoundedRect(bmp.rect(),50,50);
-    setMask(bmp);
-    setWindowOpacity(0.95);//设置透明度
+//    QBitmap bmp(this->size());//设置圆角边框
+//    bmp.fill();
+//    QPainter p(&bmp);
+//    p.setPen(Qt::NoPen);
+//    p.setBrush(Qt::black);
+//    p.drawRoundedRect(bmp.rect(),50,50);
+//    setMask(bmp);
+//    setWindowOpacity(0.95);//设置透明度
     setStyleSheet("background-color:white;");
 
     Qt::WindowFlags m_flags = windowFlags();//保持窗口置顶1
@@ -57,4 +58,5 @@ void SetWin::on_sizeSlider_valueChanged(int value)
 {
     haroSize = value;
     sizeNum->setNum(haroSize);
+    emit sizeSignal(haroSize);
 }

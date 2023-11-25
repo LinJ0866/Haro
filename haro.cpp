@@ -1,4 +1,4 @@
-#include "haro.h"
+﻿#include "haro.h"
 #include "ui_haro.h"
 
 Haro::Haro(QWidget *parent)
@@ -12,21 +12,16 @@ Haro::Haro(QWidget *parent)
     Qt::WindowFlags m_flags = windowFlags();//保持窗口置顶1
     setWindowFlags(m_flags|Qt::WindowStaysOnTopHint);//保持窗口置顶2
 
-    int coordX,coordY;//桌面坐标
-    QFile file("./file/file.dat");
-    file.open(QIODevice::ReadOnly);
-    QDataStream in(&file);
-    if(file.isOpen())//读取体型、装扮编号参数、相对桌面坐标
-        in>>size>>bodyNum>>earsNum>>coordX>>coordY;
-    else{
-        size = 400;
-        bodyNum = 0;
-        earsNum = 0;
-        coordX = x();
-        coordY = y();
-    }
-    file.close();
+    initBtn();//初始化按钮
+
+    // 读取数据库
+    db = new Db;
+    db->connect();
+
+    this->loadConfigData();
+
     move(coordX,coordY);
+    this->renderBtn(); // 渲染按钮
 
     timer = new QTimer;
     timer->start(40);//动画速度
@@ -35,6 +30,7 @@ Haro::Haro(QWidget *parent)
 
     imageLoad();//载入部位图片
     eyesMovementLoad();//载入表情图片
+    flyMovementLoad();
     specialMovementLoad();//载入特殊动作图片
 
     bodyImage = new QLabel(this);//身体图片指针
@@ -42,21 +38,24 @@ Haro::Haro(QWidget *parent)
     stripeImage = new QLabel(this);//屏幕遮盖条纹图片指针
     earsImage = new QLabel(this);//耳朵图片指针
 
+    // 加载外观
     imageSet(bodyImage,body[bodyNum]);
-
     imageSet(eyesImage,eyes);
-
     if(size>140){
         imageSet(stripeImage,stripe);
         stripeImage->show();
     }
     else
         stripeImage->hide();
-
     imageSet(earsImage,ears1[earsNum]);
 
-    initBtn();//初始化按钮
+
     initSystemTray();//初始化系统托盘
+
+    dressWindow = new DressWin();
+    setWindow = new SetWin();
+    connect(dressWindow, SIGNAL(dressSignal(QString, int)), this, SLOT(updateDressing(QString, int)));
+    connect(setWindow, SIGNAL(sizeSignal(int)), this, SLOT(updateSize(int)));
 }
 
 Haro::~Haro()
@@ -68,20 +67,6 @@ Haro::~Haro()
     delete bodyImage;
     delete eyesImage;
     delete stripeImage;
-
-    delete closeBtn;
-    delete dressBtn;
-    delete moreBtn;
-    delete minBtn;
-    delete setBtn;
-    delete musicBtn;
-    delete gameBtn;
-    delete calenBtn;
-
-    delete dressWindow;
-    delete setWindow;
-    delete calenWindow;
-    delete musicWindow;
 }
 
 void Haro::imageSet(QLabel *image,QPixmap map)
@@ -130,321 +115,247 @@ void Haro::imageLoad()
 
 void Haro::initBtn()
 {
-    closeBtn = new QPushButton(this);//关闭按钮
-    dressBtn = new QPushButton(this);//换装按钮
-    moreBtn = new QPushButton(this);//展开更多按钮
-    minBtn = new QPushButton(this);//最小化按钮
-    setBtn = new QPushButton(this);//设置按钮
-    musicBtn = new QPushButton(this);//音乐按钮
-    gameBtn = new QPushButton(this);//游戏按钮
-    calenBtn = new QPushButton(this);//日历按钮
+    // 创建按钮对象
+    for (int i = 0; i < 6; i++) {
+        btns<<new QPushButton(this);
+    }
 
-    closeBtn->setIcon(QIcon(":/images/icon/close.png"));
-    dressBtn->setIcon(QIcon(":/images/icon/dress.png"));
-    moreBtn->setIcon(QIcon(":/images/icon/more.png"));
-    minBtn->setIcon(QIcon(":/images/icon/min.png"));
-    setBtn->setIcon(QIcon(":/images/icon/setting.png"));
-    musicBtn->setIcon(QIcon(":/images/icon/music.png"));
-    gameBtn->setIcon(QIcon(":/images/icon/game.png"));
-    calenBtn->setIcon(QIcon(":/images/icon/calendar.png"));
+    // 固定按钮加载
+    btns[0]->setIcon(QIcon(":/assets/icons/close.png"));
+    btns[0]->setObjectName("m001");
+    btns[0]->setToolTip("退出");
+    btns[5]->setIcon(QIcon(":/assets/icons/more.png"));
+    btns[5]->setObjectName("m002");
+    btns[5]->setToolTip("更多（开发中）");
+    connect(btns[0], &QPushButton::clicked, this, &Haro::onBtnsClick);
+    connect(btns[5], &QPushButton::clicked, this, &Haro::onBtnsClick);
+}
+void Haro::renderBtn() {
+    QString stableStyle = {
+        "QPushButton{border:%1px solid rgb(47, 82, 143);background-color:rgb(200,210,255);border-radius: %2px;}"
+        "QPushButton::hover{background-color:rgb(170,200,255);}"
+        "QPushButton:pressed{background-color:rgb(60,70,200);}"
+    };
+    QString stableStyleClose = {
+        "QPushButton{border:%1px solid rgb(47, 82, 143);background-color:rgb(93,151,255);border-radius: %2px;}"
+        "QPushButton::hover{background-color:rgb(170,200,255);}"
+        "QPushButton:pressed{background-color:rgb(60,70,200);}"
+    };
+    btnSize = size<510?size/3:170;
+    int btnX = this->frameGeometry().width()/2-btnSize/2;
+    int btnY = this->frameGeometry().height()/2+size/2;
+    int btnX_relative[5] = {0, int(-btnSize*1.2), int(+btnSize*1.2), int(-btnSize*2.2), int(+btnSize*2.2)};
+    int btnY_relative[5] = {0, int(-btnSize*0.2), int(-btnSize*0.2), int(-btnSize*0.8), int(-btnSize*0.8)};
+    QSize iconsize(btnSize/2,btnSize/2);
 
-    reInitBtn();
+    // 关闭按钮
+    btns[0]->setStyleSheet(stableStyleClose.arg(btnSize/10).arg(btnSize/2));
+    btns[0]->setGeometry(this->frameGeometry().width()/2+size/2,this->frameGeometry().height()/2-size/1.7,btnSize,btnSize);
+    btns[0]->setIconSize(iconsize);
+    btns[0]->setVisible(btnStatus%2);
 
-    //设置按钮样式
-    setStyleSheet("QPushButton{border:4px solid black;"
-                  "background-color:rgb(200,210,255);border-radius: 10px;}"
-                  "QPushButton::hover{background-color:rgb(170,200,255);}"
-                  "QPushButton:pressed{background-color:rgb(60,70,200);}");
-
-    dressWindow = new DressWin;//换装窗口
-    dressWindow->accept(body,ears1,bodyNum,earsNum);
-
-    setWindow =  new SetWin;//设置窗口
-    setWindow->setSize(size);//为设置窗口传入size参数
-
-    musicWindow = new MusicWin;//音乐窗口
-
-    calenWindow = new QCalendarWidget;//日历窗口
-    calenWindow->setWindowFlags(Qt::FramelessWindowHint);//隐藏窗口标题栏
-    calenWindow->setWindowIcon(QIcon(":/images/icon/calendar.png")); //设置窗口图标
-    calenWindow->resize(600,400);
-
-
-    //连接按钮信号与对应槽函数
-    connect(closeBtn,&QPushButton::clicked,this,&Haro::closeBtnPush);
-    connect(dressBtn,&QPushButton::clicked,this,&Haro::dressBtnPush);
-    connect(moreBtn,&QPushButton::clicked,this,&Haro::moreBtnPush);
-    connect(minBtn,&QPushButton::clicked,this,&Haro::minBtnPush);
-    connect(setBtn,&QPushButton::clicked,this,&Haro::setBtnPush);
-    connect(musicBtn,&QPushButton::clicked,this,&Haro::musicBtnPush);
-    connect(gameBtn,&QPushButton::clicked,this,&Haro::gameBtnPush);
-    connect(calenBtn,&QPushButton::clicked,this,&Haro::calenBtnPush);
-
-    btnSwitch_1 = 0;//初始化按钮显示
-    btnSwitch_2 = 0;
-    btnSwitchRole();
+    // 主菜单
+    if (btnStatus < 2) {
+        for (int i = 1; i < 6; i++) {
+            btns[i]->setStyleSheet(stableStyle.arg(btnSize/10).arg(btnSize/2));
+            btns[i]->setGeometry(btnX+btnX_relative[i-1], btnY+btnY_relative[i-1], btnSize, btnSize);
+            btns[i]->setIconSize(iconsize);
+            btns[i]->setVisible(btnStatus%2);
+        }
+    }
 }
 
-void Haro::reInitBtn()
-{
-    btnSize = size;
-
-   // if(btnSize > 650)//限制按钮大小
-    //    btnSize = 650;
-    if(btnSize < 300)//限制按钮大小
-         btnSize = 300;
-    //按钮的坐标和大小参数
-    int btnX = this->frameGeometry().width()/2 - btnSize*3/5-5;
-    int btnY = this->frameGeometry().height()/2 - btnSize/4;
-    int btnWidth = btnSize/5;
-    int btnHeight = btnSize/8;
-
-    closeBtn->setGeometry(btnX,btnY,btnWidth,btnHeight);
-    dressBtn->setGeometry(btnX,btnY + btnSize/6,btnWidth,btnHeight);
-    moreBtn->setGeometry(btnX,btnY + 2*btnSize/6,btnWidth,btnHeight);
-    minBtn->setGeometry(btnX,btnY + 3*btnSize/6,btnWidth,btnHeight);
-
-    setBtn->setGeometry(btnX - btnWidth*1.2,btnY,btnWidth,btnHeight);
-    musicBtn->setGeometry(btnX - btnWidth*1.2,btnY + btnSize/6,btnWidth,btnHeight);
-    gameBtn->setGeometry(btnX - btnWidth*1.2,btnY + 2*btnSize/6,btnWidth,btnHeight);
-    calenBtn->setGeometry(btnX - btnWidth*1.2,btnY + 3*btnSize/6,btnWidth,btnHeight);
-    //图标大小
-    QSize temp(btnSize/8,btnSize/8);
-    closeBtn->setIconSize(temp);
-    dressBtn->setIconSize(temp);
-    moreBtn->setIconSize(temp);
-    minBtn->setIconSize(temp);
-    setBtn->setIconSize(temp);
-    musicBtn->setIconSize(temp);
-    gameBtn->setIconSize(temp);
-    calenBtn->setIconSize(temp);
-
+void Haro::hideMenuBtns() {
+    if (btnStatus % 2) { // 若为奇数，则当前为显示状态，需-1隐藏
+        this->btnStatus -= 1;
+        this->renderBtn();
+    }
 }
 
+void Haro::hideMenuBtns(int status) {
+    if (status != 1) return;
+    if (btnStatus % 2) { // 若为奇数，则当前为显示状态，需-1隐藏
+        this->btnStatus -= 1;
+    } else {
+        this->btnStatus += 1;
+    }
+    this->renderBtn();
+}
+
+
+
+// systemTray：托盘、通知
 void Haro::initSystemTray()
 {
 
     pSystemTray = new QSystemTrayIcon(this);
-    pSystemTray->setIcon(QIcon(":/images/icon/haro_icon.ico"));
-    pSystemTray->setToolTip("Hello, I'm Haro.");
-    pSystemTray->show();
-    connect(pSystemTray,&QSystemTrayIcon::activated,this,&Haro::systemTrayPush);
+    pSystemTray->setIcon(QIcon(":/assets/icons/haro_icon.ico"));
+    pSystemTray->setToolTip("你好，我是学术妲己Haro~");
 
+    // 托盘菜单
+    QAction *menuDisplay = new QAction("显示Haro", this);
+    QAction *menuRestore = new QAction("重置位置（找不到Haro时点击这个）", this);
+    QAction *menuExit = new QAction("退出", this);
+    connect(menuDisplay, &QAction::triggered, this, &Haro::restoreWindows);
+    connect(menuRestore, &QAction::triggered, this, &Haro::restorePosition);
+    connect(menuExit, &QAction::triggered, this, &Haro::closeBtnPush);
+
+    QMenu *menu = new QMenu(this);
+    menu->addAction(menuDisplay);
+    menu->addAction(menuRestore);
+    menu->addAction(menuExit);
+    pSystemTray->setContextMenu(menu);
+
+    pSystemTray->show();
+    connect(pSystemTray, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(systemTrayPush(QSystemTrayIcon::ActivationReason)));
 }
 
+// 从最小化窗口恢复
+void Haro::restoreWindows() {
+    if (this->isHidden()) {
+        this->show();
+    }
+}
+
+// 动态按钮响应
+void Haro::onBtnsClick() {
+    QPushButton* btn = static_cast<QPushButton*>(QObject::sender());
+    QString btn_name = btn->objectName();
+
+    if (btn_name == "m001") {
+        this->closeBtnPush();
+    } else if(btn_name == "m101") {
+        this->dressBtnPush();
+    } else if (btn_name == "m102") {
+        this->setBtnPush();
+    } else if (btn_name == "m103") {
+        this->minBtnPush();
+    } else {
+        pSystemTray->showMessage(btn->toolTip(), "功能开发中", QSystemTrayIcon::NoIcon, 100);
+    }
+}
+
+// 关闭
 void Haro::closeBtnPush()
 {
+    QApplication::exit(0);
+}
 
-   dressWindow->close();
-   setWindow->close();
-   musicWindow->close();
-   calenWindow->close();
+// 最小化
+void Haro::minBtnPush()
+{
+    this->hide();
 
-   this->close();
+    pSystemTray->showMessage("Haro", "已最小化在托盘显示，双击任务栏图标恢复显示", QSystemTrayIcon::NoIcon, 1000);
 
+    this->hideMenuBtns();
+}
+
+void Haro::systemTrayPush(QSystemTrayIcon::ActivationReason reason)
+{
+    if (reason == QSystemTrayIcon::DoubleClick) {
+        this->restoreWindows();
+    }
+}
+
+void Haro::restorePosition() {
+    move(0, 0);
+    updateConfigData("coordinate_x", 0);
+    updateConfigData("coordinate_y", 0);
+
+    pSystemTray->showMessage("Haro", "已恢复至默认位置", QSystemTrayIcon::NoIcon, 1000);
+
+    this->restoreWindows();
 }
 
 void Haro::dressBtnPush()
 {
-    if(dressWindow->isHidden()){
-        dressWindow->move(x()+frameGeometry().width()/2-10
-                          -btnSize*0.6-dressWindow->frameGeometry().width(),
-                          y()+frameGeometry().height()/2-150
-                          -dressWindow->frameGeometry().height()/2);
-        dressWindow->show();
-        calenWindow->hide();
-        setWindow->hide();
-        musicWindow->hide();
-        btnSwitch_2=0;
-        btnSwitchRole();
-    }
-    else
-        dressWindow->hide();
-}
-
-void Haro::moreBtnPush()
-{
-    if(btnSwitch_2==0)
-        btnSwitch_2=1;
-    else
-        btnSwitch_2=0;
-
-    btnSwitchRole();
-    dressWindow->hide();
-}
-
-void Haro::minBtnPush()
-{
-    //this->setWindowState(Qt::WindowMinimized);//最小化窗口（已弃用）
-    this->hide();
-    dressWindow->hide();
-    calenWindow->hide();
-    setWindow->hide();
-    musicWindow->hide();
-
-    btnSwitch_1=0;
-    btnSwitch_2=0;
-    btnSwitchRole();
-
+    this->hideMenuBtns();
+    dressWindow->accept(body,ears1,bodyNum,earsNum);
+    dressWindow->show();
 }
 
 void Haro::setBtnPush()
 {
-    if(setWindow->isHidden()){
-        //移动窗口坐标↓
-        setWindow->move(x()+frameGeometry().width()/2
-        -btnSize*(btnSwitch_1+btnSwitch_2+1.5)/4-setWindow->frameGeometry().width(),
-        y()+frameGeometry().height()/2-size/5
-        -setWindow->frameGeometry().height()/2);
-
-        setWindow->show();
-        calenWindow->hide();
-        musicWindow->hide();
-    }
-    else
-        setWindow->hide();
+    this->hideMenuBtns();
+    setWindow->setSize(size);//为设置窗口传入size参数
+    setWindow->show();
 }
 
-void Haro::musicBtnPush()
-{
-    if(musicWindow->isHidden()){
-        //移动窗口坐标↓
-        musicWindow->move(x()+frameGeometry().width()/2
-        -btnSize*(btnSwitch_1+btnSwitch_2+1.5)/4-musicWindow->frameGeometry().width(),
-        y()+frameGeometry().height()/2-size/5
-        -musicWindow->frameGeometry().height()/2);
+//void Haro::gameBtnPush()
+//{
+//    //隐藏所有窗口
+//    this->hide();
+//    setWindow->hide();
+//    calenWindow->hide();
+//    musicWindow->hide();
+//    QDir dir( "./game/Sky_island/Release/Sky_island.exe.lnk");//获取相对路径
+//    QString temDir = dir.absolutePath();//通过相对路径获取绝对路径
+//    system(temDir.toLatin1());
 
-        musicWindow->show();
-        calenWindow->hide();
-        setWindow->hide();
-    }
-    else
-        musicWindow->hide();
-}
+//    //↑通过cmd启动游戏，toLatin1()将QString类型转为char*类型
+//    //阻塞式启动，关闭后游戏窗口后才运行下面语段↓
+//    //隐藏按钮↓
+//    btnSwitch_1=0;
+//    btnSwitch_2=0;
+//    btnSwitchRole();
 
-void Haro::gameBtnPush()
-{
-    //隐藏所有窗口
-    this->hide();
-    setWindow->hide();
-    calenWindow->hide();
-    musicWindow->hide();
-    QDir dir( "./game/Sky_island/Release/Sky_island.exe.lnk");//获取相对路径
-    QString temDir = dir.absolutePath();//通过相对路径获取绝对路径
-    system(temDir.toLatin1());
-
-    //↑通过cmd启动游戏，toLatin1()将QString类型转为char*类型
-    //阻塞式启动，关闭后游戏窗口后才运行下面语段↓
-    //隐藏按钮↓
-    btnSwitch_1=0;
-    btnSwitch_2=0;
-    btnSwitchRole();
-
-    this->show();
-}
-
-void Haro::calenBtnPush()
-{
-    if(calenWindow->isHidden()){
-        //移动窗口坐标↓
-        calenWindow->move(x()+frameGeometry().width()/2
-        -btnSize*(btnSwitch_1+btnSwitch_2+1.5)/4-calenWindow->frameGeometry().width(),
-        y()+frameGeometry().height()/2-size/5
-        -calenWindow->frameGeometry().height()/2);
-
-        calenWindow->show();
-        musicWindow->hide();
-        setWindow->hide();
-    }
-    else
-        calenWindow->hide();
-}
-
-void Haro::systemTrayPush()
-{
-
-    if(this->isHidden())
-        this->show();
-
-}
-
-void Haro::btnSwitchRole()
-{
-    //根据btnSwitch调整按钮是否显示
-    closeBtn->setVisible(btnSwitch_1);
-    dressBtn->setVisible(btnSwitch_1);
-    moreBtn->setVisible(btnSwitch_1);
-    minBtn->setVisible(btnSwitch_1);
-    setBtn->setVisible(btnSwitch_2);
-    musicBtn->setVisible(btnSwitch_2);
-    gameBtn->setVisible(btnSwitch_2);
-    calenBtn->setVisible(btnSwitch_2); 
-    //移动窗口坐标↓
-    musicWindow->move(x()+frameGeometry().width()/2
-    -btnSize*(btnSwitch_1+btnSwitch_2+1.5)/4-musicWindow->frameGeometry().width(),
-    y()+frameGeometry().height()/2-size/5
-    -musicWindow->frameGeometry().height()/2);
-    //移动窗口坐标↓
-    calenWindow->move(x()+frameGeometry().width()/2
-    -btnSize*(btnSwitch_1+btnSwitch_2+1.5)/4-calenWindow->frameGeometry().width(),
-    y()+frameGeometry().height()/2-size/5
-    -calenWindow->frameGeometry().height()/2);
-
-
-}
+//    this->show();
+//}
 
 void Haro::mouseMoveEvent(QMouseEvent *event)
 {
+    if (draggingCount > 0) {
+        draggingCount += 1;
+        // 处理阈值
+        if (draggingCount > 10) {
+            this->move(event->globalPos()-moveLeftTop);
 
-    if(event->buttons() & Qt::LeftButton)//鼠标左键按下并移动时，实现拖动窗口
-    {
-        this->move(event->globalPos()-moveLeftTop);
-        dressWindow->move(x()+frameGeometry().width()/2-10
-                          -btnSize*0.6-dressWindow->frameGeometry().width(),
-                          y()+frameGeometry().height()/2-150
-                          -dressWindow->frameGeometry().height()/2);
-
-        musicWindow->move(x()+frameGeometry().width()/2
-        -btnSize*(btnSwitch_1+btnSwitch_2+1.5)/4-musicWindow->frameGeometry().width(),
-        y()+frameGeometry().height()/2-size/5
-        -musicWindow->frameGeometry().height()/2);
-
-        calenWindow->move(x()+frameGeometry().width()/2
-        -btnSize*(btnSwitch_1+btnSwitch_2+1.5)/4-calenWindow->frameGeometry().width(),
-        y()+frameGeometry().height()/2-size/5
-        -calenWindow->frameGeometry().height()/2);
-        saveData();
-    }
+            // 拖动时收起按钮
+            this->hideMenuBtns();
+        }
+     }
 }
 
 void Haro::mousePressEvent(QMouseEvent *event)
 {
-    static int flag = 0;//触发特殊动作的计数变量
-    if(event->button() == Qt::LeftButton){//鼠标左键事件
-    moveLeftTop = event->pos();
-    if(face<0&&spMove<0){//随机播放表情
-        face = qrand()%(faceSum-1)+1;
-        flag++;
-        if(flag==10){//触发蓝屏
-            flag = 0;
-            spMove = 0;
-            face = -1;
-        }
+    if (event->pos().y() > this->frameGeometry().height()/2 - size/2 &&
+            event->pos().y() < this->frameGeometry().height()/2 + size/2 &&
+            event->pos().x() > this->frameGeometry().width()/2 - size/2 &&
+            event->pos().x() < this->frameGeometry().width()/2 + size/2) {
+        moveLeftTop = event->globalPos() - this->pos();
+        draggingCount = 1;
     }
- }
- else if(event->button() == Qt::RightButton){//鼠标右键事件
-     if(btnSwitch_1){//隐藏按钮
-         btnSwitch_1=0;
-         btnSwitch_2=0;
-     }
-     else
-         btnSwitch_1=1;//显示按钮
+}
 
-   dressWindow->hide();
-    btnSwitchRole();
- }
+void Haro::mouseReleaseEvent(QMouseEvent *event)
+{
+    // 更新位置存储
+    if (draggingCount > 10) {
+        this->updateConfigData("coordinate_x", x());
+        this->updateConfigData("coordinate_y", y());
+        draggingCount = 0;
+        flyMove = 0;
+        face = 0;
+        return;
+    }
+    draggingCount = 0;
 
-
+    static int flag = 0;//触发特殊动作的计数变量
+    //鼠标左键事件,切换表情
+    if(event->button() == Qt::LeftButton) {
+        if(face<0&&spMove<0){//随机播放表情
+            face = qrand()%(faceSum-1)+1;
+            flag++;
+            if(flag==10){//触发蓝屏
+                flag = 0;
+                spMove = 0;
+                face = -1;
+            }
+        }
+    } else if (event->button() == Qt::RightButton){ //鼠标右键事件
+        this->hideMenuBtns(1);
+    }
 }
 
 void Haro::eyesMovementLoad()
@@ -476,8 +387,18 @@ void Haro::eyesMovementLoad()
 
 void Haro::eyesMovement()
 {
+    if (draggingCount > 10) {
+        flyMove++;
+        if (flyMove > 10) {
+            eyesImage->setPixmap(flyMovement[10+flyMove%12].scaled(size,size));
+        } else {
+            eyesImage->setPixmap(flyMovement[flyMove].scaled(size,size));
+        }
+        return;
+    }
     //各种静态变量，用于计数、记录状态等↓
     static int flag = 0,second1 = 0,second2 = 0,earSwitch = 1;
+
     int valve = qrand()%200;
     if(face<0 && spMove<0){//控制眨眼动作
         second1++;
@@ -515,42 +436,14 @@ void Haro::eyesMovement()
             eyesImage->setPixmap(eyes.scaled(size,size));
         }
     }
-    if(!dressWindow->isHidden()){//从换装窗口中获取bodyNum、earsNum参数
-        if(bodyNum!=dressWindow->getBodyNum()){
-            bodyNum = dressWindow->getBodyNum();
-            bodyImage->setPixmap(body[bodyNum].scaled(size,size));
-            saveData();
-        }
-        if(earsNum!=dressWindow->getEarsNum()){
-            earsNum = dressWindow->getEarsNum();
-            earsImage->setPixmap(ears1[earsNum].scaled(size,size));
-            saveData();
-        }
-    }
-
-    if(!setWindow->isHidden()){//从设置窗口中获取size参数
-        if(size!=setWindow->getSize()){
-            size = setWindow->getSize();
-
-            imageSet(bodyImage,body[bodyNum]);
-            imageSet(eyesImage,eyes);
-            if(size>140){
-                imageSet(stripeImage,stripe);
-                stripeImage->show();
-            }
-            else
-                stripeImage->hide();
-            imageSet(earsImage,ears1[earsNum]);
-
-            saveData();
-            reInitBtn();
-        }
-    }
     if(spMove>-1)//特殊动作
         specialMovement();
 }
 
-
+void Haro::flyMovementLoad() {
+    for(int i = 1;i<=22;i++)
+        flyMovement.push_back(QPixmap(QString(":/images/movement/fly/%1.png").arg(i)));
+}
 void Haro::specialMovementLoad()
 {
     for(int i = 1;i<=11;i++)
@@ -573,23 +466,76 @@ void Haro::specialMovement(){
             spMove=-1;
             return ;
         }
-
     }
-
 
     flag++;
 }
 
-void Haro::saveData()
-{
-    QFile file("./file/file.dat");
-    file.open(QIODevice::WriteOnly);
-    QDataStream out(&file);
-    out<<size<<bodyNum<<earsNum<<x()<<y();//存储体型、装扮编号参数、窗口坐标
-    file.close();
+
+void Haro::loadConfigData() {
+    QHash<QString,QString> configData;
+    QHash<QString,QString> btnData;
+    db->getData("config", configData);
+    // TODO：统一管理初始化
+    if (configData.empty()) {
+        configData["scale"] = "100";
+        configData["dress_head"] = "0";
+        configData["dress_clothes"] = "0";
+        configData["coordinate_x"] = "0";
+        configData["coordinate_y"] = "0";
+
+        db->addData("config", configData);
+    }
+
+    size = configData["scale"].toInt();
+    bodyNum = configData["dress_head"].toInt();
+    earsNum = configData["dress_clothes"].toInt();
+    coordX = configData["coordinate_x"].toInt();
+    coordY = configData["coordinate_y"].toInt();
+
+    // 菜单按钮动态加载
+    for(int i=0; i<4; i++) {
+        db->getData("buttons", btnData, "where b_id == "+configData["button"+QString::number(i+1)+"_id"]);
+
+        btns[menuBtnIdxs[i]]->setObjectName("m"+btnData["function_id"]);
+        btns[menuBtnIdxs[i]]->setIcon(QIcon(btnData["icon_url"]));
+        btns[menuBtnIdxs[i]]->setToolTip(btnData["name"]);
+        connect(btns[menuBtnIdxs[i]], &QPushButton::clicked, this, &Haro::onBtnsClick);
+    }
+
+    return;
 }
 
+// 更新config
+void Haro::updateConfigData(QString key, int value) {
+    QHash<QString,QString> configData;
+    configData[key] = QString::number(value);
+    db->updateData("config", configData);
+}
 
+void Haro::updateDressing(QString key, int value) {
+    if (key == "head") {
+        bodyNum = value;
+        imageSet(bodyImage,body[bodyNum]);
+        this->updateConfigData("dress_head", value);
+    } else if (key == "clothes") {
+        earsNum = value;
+        imageSet(earsImage,ears1[earsNum]);
+        this->updateConfigData("dress_clothes", value);
+    }
+}
 
-
-
+void Haro::updateSize(int value) {
+    size = value;
+    imageSet(bodyImage,body[bodyNum]);
+    imageSet(eyesImage,eyes);
+    if(size>140){
+        imageSet(stripeImage,stripe);
+        stripeImage->show();
+    }
+    else
+        stripeImage->hide();
+    imageSet(earsImage,ears1[earsNum]);
+    this->updateConfigData("scale", value);
+    renderBtn();
+}
