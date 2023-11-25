@@ -228,6 +228,8 @@ void Haro::onBtnsClick() {
         this->dressBtnPush();
     } else if (btn_name == "m102") {
         this->setBtnPush();
+    } else if (btn_name == "m103") {
+        this->minBtnPush();
     } else {
         pSystemTray->showMessage(btn->toolTip(), "功能开发中", QSystemTrayIcon::NoIcon, 100);
     }
