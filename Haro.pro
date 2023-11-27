@@ -18,26 +18,26 @@ DEFINES += QT_DEPRECATED_WARNINGS
 QT += multimedia
 QT += sql
 
-SOURCES += \
-    db.cpp \
-    dresswin.cpp \
-    main.cpp \
-    haro.cpp \
-    musicwin.cpp \
-    setwin.cpp
+INCLUDEPATH += src/include
 
-HEADERS += \
-    db.h \
-    dresswin.h \
-    haro.h \
-    musicwin.h \
-    setwin.h
+SOURCES += main.cpp \
+    src/resource.cpp \
+    src/systemtray.cpp \
+    src/db.cpp \
+    src/dresswin.cpp \
+    src/haro.cpp \
+    src/setwin.cpp
 
-FORMS += \
-    dresswin.ui \
-    haro.ui \
-    musicwin.ui \
-    setwin.ui
+HEADERS += src/include/db.h \
+           src/include/dresswin.h \
+           src/include/haro.h \
+           src/include/resource.h \
+           src/include/setwin.h \
+           src/include/systemtray.h
+
+FORMS += src/include/dresswin.ui \
+         src/include/haro.ui \
+         src/include/setwin.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
