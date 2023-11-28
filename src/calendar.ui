@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Calendar</class>
+ <widget class="QWidget" name="Calendar">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>996</width>
+    <height>673</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: rgb(255, 255, 255);</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="1,1,10">
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <property name="leftMargin">
+    <number>10</number>
+   </property>
+   <property name="topMargin">
+    <number>10</number>
+   </property>
+   <property name="rightMargin">
+    <number>10</number>
+   </property>
+   <property name="bottomMargin">
+    <number>10</number>
+   </property>
+   <item>
+    <layout class="QHBoxLayout" name="menu">
+     <property name="topMargin">
+      <number>10</number>
+     </property>
+     <property name="bottomMargin">
+      <number>20</number>
+     </property>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButton">
+       <property name="text">
+        <string>&lt;</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="autoFillBackground">
+        <bool>false</bool>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font: 75 16pt &quot;微软雅黑&quot;;
+color: rgb(0, 0, 0);</string>
+       </property>
+       <property name="text">
+        <string>11月</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="autoFillBackground">
+        <bool>false</bool>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font: 75 16pt &quot;微软雅黑&quot;;
+color: rgb(0, 0, 0);</string>
+       </property>
+       <property name="text">
+        <string>2023年</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButton_2">
+       <property name="text">
+        <string>&gt;</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QLabel" name="remind">
+     <property name="styleSheet">
+      <string notr="true">font: 12pt &quot;微软雅黑&quot;;
+color: rgb(0, 0, 0);</string>
+     </property>
+     <property name="text">
+      <string>本月共专注工作x次，总时长240分钟，预计专注率71.7%，再接再厉！</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QGridLayout" name="month" rowstretch="1,3,3,3,3,3">
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <item row="4" column="0">
+      <widget class="Calendar_day" name="day4" native="true"/>
+     </item>
+     <item row="2" column="3">
+      <widget class="Calendar_day" name="day2_4" native="true"/>
+     </item>
+     <item row="1" column="3">
+      <widget class="Calendar_day" name="day1_4" native="true"/>
+     </item>
+     <item row="2" column="4">
+      <widget class="Calendar_day" name="day2_5" native="true"/>
+     </item>
+     <item row="2" column="1">
+      <widget class="Calendar_day" name="day2_2" native="true"/>
+     </item>
+     <item row="3" column="4">
+      <widget class="Calendar_day" name="day3_5" native="true"/>
+     </item>
+     <item row="3" column="3">
+      <widget class="Calendar_day" name="day3_4" native="true"/>
+     </item>
+     <item row="1" column="0">
+      <widget class="Calendar_day" name="day1_1" native="true">
+       <property name="styleSheet">
+        <string notr="true">#day1_1 {
+	border: 10px solid rgb(236, 236, 236)
+}</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="Calendar_day" name="day2" native="true"/>
+     </item>
+     <item row="0" column="6">
+      <widget class="QLabel" name="label_11">
+       <property name="styleSheet">
+        <string notr="true">color: rgb(0, 0, 0);
+font: 12pt &quot;微软雅黑&quot;;
+border-bottom: 1px solid rgb(227, 227, 227);</string>
+       </property>
+       <property name="text">
+        <string>周日</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="2">
+      <widget class="Calendar_day" name="day1_3" native="true"/>
+     </item>
+     <item row="3" column="2">
+      <widget class="Calendar_day" name="day3_3" native="true"/>
+     </item>
+     <item row="0" column="4">
+      <widget class="QLabel" name="label_9">
+       <property name="styleSheet">
+        <string notr="true">color: rgb(0, 0, 0);
+font: 12pt &quot;微软雅黑&quot;;
+border-bottom: 1px solid rgb(227, 227, 227);</string>
+       </property>
+       <property name="text">
+        <string>周五</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="Calendar_day" name="day1_2" native="true"/>
+     </item>
+     <item row="2" column="6">
+      <widget class="Calendar_day" name="day2_7" native="true"/>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLabel" name="label_6">
+       <property name="styleSheet">
+        <string notr="true">color: rgb(0, 0, 0);
+font: 12pt &quot;微软雅黑&quot;;
+border-bottom: 1px solid rgb(227, 227, 227);</string>
+       </property>
+       <property name="text">
+        <string>周二</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="Calendar_day" name="day3_2" native="true"/>
+     </item>
+     <item row="0" column="2">
+      <widget class="QLabel" name="label_7">
+       <property name="styleSheet">
+        <string notr="true">color: rgb(0, 0, 0);
+font: 12pt &quot;微软雅黑&quot;;
+border-bottom: 1px solid rgb(227, 227, 227);</string>
+       </property>
+       <property name="text">
+        <string>周三</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="4">
+      <widget class="Calendar_day" name="day1_5" native="true"/>
+     </item>
+     <item row="0" column="3">
+      <widget class="QLabel" name="label_8">
+       <property name="styleSheet">
+        <string notr="true">color: rgb(0, 0, 0);
+font: 12pt &quot;微软雅黑&quot;;
+border-bottom: 1px solid rgb(227, 227, 227);</string>
+       </property>
+       <property name="text">
+        <string>周四</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="2">
+      <widget class="Calendar_day" name="day2_3" native="true"/>
+     </item>
+     <item row="1" column="5">
+      <widget class="Calendar_day" name="day1_6" native="true"/>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_5">
+       <property name="styleSheet">
+        <string notr="true">color: rgb(0, 0, 0);
+font: 12pt &quot;微软雅黑&quot;;
+border-bottom: 1px solid rgb(227, 227, 227);</string>
+       </property>
+       <property name="text">
+        <string>周一</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="6">
+      <widget class="Calendar_day" name="day1_7" native="true"/>
+     </item>
+     <item row="2" column="5">
+      <widget class="Calendar_day" name="day2_6" native="true"/>
+     </item>
+     <item row="3" column="5">
+      <widget class="Calendar_day" name="day3_6" native="true"/>
+     </item>
+     <item row="0" column="5">
+      <widget class="QLabel" name="label_10">
+       <property name="styleSheet">
+        <string notr="true">color: rgb(0, 0, 0);
+font: 12pt &quot;微软雅黑&quot;;
+border-bottom: 1px solid rgb(227, 227, 227);</string>
+       </property>
+       <property name="text">
+        <string>周六</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="6">
+      <widget class="Calendar_day" name="day3_7" native="true"/>
+     </item>
+     <item row="3" column="0">
+      <widget class="Calendar_day" name="day3_1" native="true"/>
+     </item>
+     <item row="5" column="0">
+      <widget class="Calendar_day" name="day5" native="true"/>
+     </item>
+     <item row="4" column="6">
+      <widget class="Calendar_day" name="day4_7" native="true"/>
+     </item>
+     <item row="4" column="5">
+      <widget class="Calendar_day" name="day4_6" native="true"/>
+     </item>
+     <item row="4" column="4">
+      <widget class="Calendar_day" name="day4_5" native="true"/>
+     </item>
+     <item row="4" column="3">
+      <widget class="Calendar_day" name="day4_4" native="true"/>
+     </item>
+     <item row="4" column="2">
+      <widget class="Calendar_day" name="day4_3" native="true"/>
+     </item>
+     <item row="4" column="1">
+      <widget class="Calendar_day" name="day4_2" native="true"/>
+     </item>
+     <item row="5" column="6">
+      <widget class="Calendar_day" name="day5_7" native="true"/>
+     </item>
+     <item row="5" column="5">
+      <widget class="Calendar_day" name="day5_6" native="true"/>
+     </item>
+     <item row="5" column="4">
+      <widget class="Calendar_day" name="day5_5" native="true"/>
+     </item>
+     <item row="5" column="3">
+      <widget class="Calendar_day" name="day5_4" native="true"/>
+     </item>
+     <item row="5" column="2">
+      <widget class="Calendar_day" name="day5_3" native="true"/>
+     </item>
+     <item row="5" column="1">
+      <widget class="Calendar_day" name="day5_2" native="true"/>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>Calendar_day</class>
+   <extends>QWidget</extends>
+   <header>calendar_day.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

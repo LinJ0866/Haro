@@ -16,6 +16,7 @@ Haro::Haro(QWidget *parent)
     dressWindow = new DressWin();
     setWindow = new SetWin();
     systray = new systemtray();
+    calendar = new Calendar;
 
     bodyImage = new QLabel(this);//身体图片指针
     eyesImage = new QLabel(this);//眼部图片指针
@@ -236,6 +237,8 @@ void Haro::onBtnsClick() {
         this->setBtnPush();
     } else if (btn_name == "m103") {
         this->minBtnPush();
+    } else if (btn_name == "m202") {
+        this->TimeBoardBtnPush();
     } else {
         systray->sendNotification(btn->toolTip(), "功能开发中");
     }
@@ -286,6 +289,12 @@ void Haro::setBtnPush()
     setWindow->show();
 }
 
+void Haro::TimeBoardBtnPush() {
+    this->hideMenuBtns();
+    calendar->updateTime();
+    calendar->render();
+    calendar->show();
+}
 //void Haro::gameBtnPush()
 //{
 //    //隐藏所有窗口

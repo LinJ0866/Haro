@@ -21,6 +21,8 @@ QT += sql
 INCLUDEPATH += src/include
 
 SOURCES += main.cpp \
+    src/calendar.cpp \
+    src/calendar_day.cpp \
     src/resource.cpp \
     src/systemtray.cpp \
     src/db.cpp \
@@ -29,6 +31,8 @@ SOURCES += main.cpp \
     src/setwin.cpp
 
 HEADERS += src/include/db.h \
+           src/include/calendar.h \
+           src/include/calendar_day.h \
            src/include/dresswin.h \
            src/include/haro.h \
            src/include/resource.h \
@@ -36,6 +40,8 @@ HEADERS += src/include/db.h \
            src/include/systemtray.h
 
 FORMS += src/include/dresswin.ui \
+         src/include/calendar.ui \
+         src/include/calendar_day.ui \
          src/include/haro.ui \
          src/include/setwin.ui
 
@@ -47,11 +53,3 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 RESOURCES += \
     res.qrc
 
-DISTFILES += \
-    images/appearance/body/Gundam_body.png \
-    images/movement/blink/动作1.png \
-    images/movement/blink/动作2.png \
-    images/movement/blink/动作3.png \
-    images/movement/blink/动作4.png \
-    images/movement/blink/动作5.png \
-    images/movement/blink/动作6.png

@@ -18,6 +18,7 @@
 #include "dresswin.h"
 #include "setwin.h"
 #include "db.h"
+#include "calendar.h"
 
 using namespace std;
 
@@ -35,6 +36,7 @@ private:
     systemtray *systray;
     DressWin *dressWindow;//换装窗口指针
     SetWin *setWindow;//设置窗口指针
+    Calendar* calendar;
 
     QLabel *bodyImage,*earsImage,*eyesImage,*stripeImage;//各部件对应标签
 
@@ -83,6 +85,7 @@ private:
     void dressBtnPush();//点击装扮按钮事件
     void minBtnPush();//点击最小化按钮事件
     void setBtnPush();//点击设置按钮事件
+    void TimeBoardBtnPush();
 
     void loadConfigData(); // 加载config数据
     void updateConfigData(QString key, int value); // 存储config数据
