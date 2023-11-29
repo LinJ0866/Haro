@@ -108,7 +108,7 @@ void Haro::eyesMovement()
                                                 ).arg(Movement::getMovementName(Movement::MovementKind::Blink)).arg(this->eyeMoveIdx*4));
             } else {
                 HaroUiUpdate(eyesImage, QString(":/assets/movement/%1/%2.png"
-                                                ).arg(Movement::getMovementName((Movement::MovementKind)eyeMoveKind)).arg(this->eyeMoveIdx-2));
+                                                ).arg(Movement::getMovementName(Movement::MovementKind::Fly)).arg(this->eyeMoveIdx-2));
             }
             if (eyeMoveIdx == 36) {
                 eyeMoveIdx = 11;
@@ -125,7 +125,7 @@ void Haro::eyesMovement()
             eyeMoveKind = -1;
         }
     } else if(eyeMoveKind == -2) {
-        // TODO：时间
+        // 时间
         eyesImage->resize(windowSize,windowSize);
         eyesImage->setAlignment(Qt::AlignCenter);
         eyesImage->setStyleSheet(QString("color: rgb(63,72,204); font: %1px;").arg(windowSize/4));
@@ -133,13 +133,25 @@ void Haro::eyesMovement()
                         this->frameGeometry().height()/2 - windowSize/2.1);
         eyesImage->setText("11:09");
     } else if(eyeMoveKind == -3) {
-        // TODO：文字跑马灯
+        // 文字跑马灯
         eyesImage->resize(windowSize,windowSize);
         eyesImage->setAlignment(Qt::AlignCenter);
         eyesImage->setStyleSheet(QString("color: rgb(63,72,204); font: %1px;").arg(windowSize/4));
         eyesImage->move(this->frameGeometry().width()/2 - windowSize/2,
                         this->frameGeometry().height()/2 - windowSize/2.1);
-        eyesImage->setText("测试跑马灯");
+        eyesImage->setText(eyeTextContent.mid(eyeTextIdx, 3));
+        if (eyeMoveIdx > 30 && eyeTextIdx < eyeTextContent.length()-3 && eyeMoveIdx % 3 == 0) {
+            eyeTextIdx ++;
+        }
+
+        if (eyeMoveIdx == 60+(eyeTextContent.length()-2)*3) {
+            eyeTextIdx = 0;
+            eyeMoveIdx = 0;
+            eyeTextContent = "";
+            eyeMoveKind = -1;
+            return;
+        }
+        eyeMoveIdx++;
     } else {
         if ((rand() % 100) == 1) {
             eyeMoveKind = Movement::Blink;

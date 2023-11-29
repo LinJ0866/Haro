@@ -51,6 +51,8 @@ private:
     int eyeMoveKind = -1;
     int eyeMoveMax = -1;
     int eyeErrorIdx = 0;
+    int eyeTextIdx = 0;
+    QString eyeTextContent;
 
     int strideThreshold = 170;
     int EAR_SWITCH_MAX_COUNT = 40;
