@@ -57,6 +57,10 @@ Calendar::~Calendar()
     delete ui;
 }
 
+void Calendar::getDb(Db *db) {
+    this->db = db;
+}
+
 void Calendar::updateTime() {
     QDate dateTime= QDateTime::currentDateTime().date();
     year = dateTime.year();
@@ -88,7 +92,12 @@ void Calendar::render() {
 
     for (i = 1; i <= daycount; i++)
     {
-        qDebug()<<i<<k<<day;
+        QList<QHash<QString,QString>> dayItem;
+        // qDebug()<<i<<k<<day;
+
+        db->getData("timelines", dayItem, QString("where is_delete == 0 and year == %1 and month == %2 and day == %3").arg(year).arg(month).arg(i));
+        getdayItem(k,day)->addDayItem(dayItem);
+
         getdayItem(k,day++)->set(QString::number(i), true, day>6, i==today);
         if (day == 8) {
             k++;

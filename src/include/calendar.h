@@ -8,6 +8,7 @@
 
 #include "resource.h"
 #include "calendar_day.h"
+#include "db.h"
 
 using namespace std;
 
@@ -25,10 +26,11 @@ public:
 
     void updateTime();
     void render();
-
+    void getDb(Db *db);
 private:
     Ui::Calendar *ui;
     Calendar_day* getdayItem(int y, int x);
+    Db *db;
     int month, year;
     int nowMonth, nowDay;
 private slots:

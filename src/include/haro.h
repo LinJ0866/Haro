@@ -52,7 +52,7 @@ private:
     int eyeMoveMax = -1;
     int eyeErrorIdx = 0;
 
-    int strideThreshold = 60;
+    int strideThreshold = 170;
     int EAR_SWITCH_MAX_COUNT = 40;
     int draggingCount = 0; // 拖动抖动
 

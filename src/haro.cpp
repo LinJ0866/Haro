@@ -16,7 +16,8 @@ Haro::Haro(QWidget *parent)
     dressWindow = new DressWin();
     setWindow = new SetWin();
     systray = new systemtray();
-    calendar = new Calendar;
+    calendar = new Calendar();
+    calendar->getDb(db);
 
     bodyImage = new QLabel(this);//身体图片指针
     eyesImage = new QLabel(this);//眼部图片指针
@@ -37,10 +38,11 @@ Haro::Haro(QWidget *parent)
     HaroUiUpdate(eyesImage, Eye::getEye(Eye::Eye), true);
     HaroUiUpdate(stripeImage, Stripe::getStripe(Stripe::Stripe), true);
 
-    if (windowSize > strideThreshold) {
+    if (windowSize < strideThreshold) {
         stripeImage->setVisible(false);
     } else {
         stripeImage->setVisible(true);
+        stripeImage->raise();
     }
     renderBtn();
     this->move(coordX, coordY);
@@ -123,7 +125,21 @@ void Haro::eyesMovement()
             eyeMoveKind = -1;
         }
     } else if(eyeMoveKind == -2) {
-        // TODO：专注模式
+        // TODO：时间
+        eyesImage->resize(windowSize,windowSize);
+        eyesImage->setAlignment(Qt::AlignCenter);
+        eyesImage->setStyleSheet(QString("color: rgb(63,72,204); font: %1px;").arg(windowSize/4));
+        eyesImage->move(this->frameGeometry().width()/2 - windowSize/2,
+                        this->frameGeometry().height()/2 - windowSize/2.1);
+        eyesImage->setText("11:09");
+    } else if(eyeMoveKind == -3) {
+        // TODO：文字跑马灯
+        eyesImage->resize(windowSize,windowSize);
+        eyesImage->setAlignment(Qt::AlignCenter);
+        eyesImage->setStyleSheet(QString("color: rgb(63,72,204); font: %1px;").arg(windowSize/4));
+        eyesImage->move(this->frameGeometry().width()/2 - windowSize/2,
+                        this->frameGeometry().height()/2 - windowSize/2.1);
+        eyesImage->setText("测试跑马灯");
     } else {
         if ((rand() % 100) == 1) {
             eyeMoveKind = Movement::Blink;
@@ -431,10 +447,11 @@ void Haro::updateSize(int value) {
     HaroUiUpdate(earsImage, Ear::getEar((Ear::EarName)earsDressIdx), true);
     HaroUiUpdate(eyesImage, Eye::getEye(Eye::Eye), true);
     HaroUiUpdate(stripeImage, Stripe::getStripe(Stripe::Stripe), true);
-    if (windowSize > strideThreshold) {
+    if (windowSize < strideThreshold) {
         stripeImage->setVisible(false);
     } else {
         stripeImage->setVisible(true);
+        stripeImage->raise();
     }
 
     updateConfigData("window_size", value);

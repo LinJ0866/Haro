@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>261</width>
-    <height>198</height>
+    <width>139</width>
+    <height>128</height>
    </rect>
   </property>
   <property name="focusPolicy">
@@ -22,7 +22,7 @@
   <property name="styleSheet">
    <string notr="true"/>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="2,1,1,1,2">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="2,1,1,1">
    <property name="spacing">
     <number>3</number>
    </property>
@@ -54,23 +54,41 @@ color: rgb(0, 0, 0);</string>
    </item>
    <item>
     <widget class="QLabel" name="label1">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>30</height>
+      </size>
+     </property>
      <property name="styleSheet">
       <string notr="true">color: rgb(0, 0, 0);
 font: 8pt &quot;微软雅黑&quot;;</string>
      </property>
      <property name="text">
-      <string>事项1</string>
+      <string/>
      </property>
     </widget>
    </item>
    <item>
     <widget class="QLabel" name="label2">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>30</height>
+      </size>
+     </property>
      <property name="styleSheet">
       <string notr="true">color: rgb(0, 0, 0);
 font: 8pt &quot;微软雅黑&quot;;</string>
      </property>
      <property name="text">
-      <string>事项2</string>
+      <string/>
      </property>
     </widget>
    </item>
@@ -81,22 +99,9 @@ font: 8pt &quot;微软雅黑&quot;;</string>
 font: 8pt &quot;微软雅黑&quot;;</string>
      </property>
      <property name="text">
-      <string>事项3</string>
+      <string>...    +n</string>
      </property>
     </widget>
-   </item>
-   <item>
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
    </item>
   </layout>
  </widget>

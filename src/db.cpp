@@ -11,7 +11,7 @@ Db::Db()
 void Db::checkAndCreateTables()
 {
     QSqlQuery sql_query;
-    QStringList table_name = {"config", "buttons"};
+    QStringList table_name = {"config", "buttons", "timelines"};
     QStringList create_sqls = {
         "create table IF NOT EXISTS config (coordinate_x int, coordinate_y int, window_size int, dress_body int, dress_ears int, button1_id INTEGER, button2_id INTEGER, button3_id INTEGER, button4_id INTEGER)",
         "create table IF NOT EXISTS buttons ("
@@ -19,6 +19,20 @@ void Db::checkAndCreateTables()
                 "icon_url string,"
                 "name string,"
                 "function_id int,"
+                "is_delete int"
+        ")",
+        "create table IF NOT EXISTS timelines ("
+                "t_id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                "year int,"
+                "month int,"
+                "day int,"
+                "start_time string,"
+                "end_time string,"
+                "is_end int"
+                "end_reason string,"
+                "work_type int,"
+                "work_desc string,"
+                "work_score int,"
                 "is_delete int"
         ")"
     };

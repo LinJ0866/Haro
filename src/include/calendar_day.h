@@ -6,6 +6,7 @@
 #include <QVector>
 #include <QIcon>
 #include <QDebug>
+#include <QLabel>
 
 #include "resource.h"
 
@@ -16,7 +17,10 @@ class Calendar_day;
 class DayItemClass {
 public:
     QString title;
-    int type;
+    int workType;
+    QString start_time;
+    QString end_time;
+    int score;
 };
 
 
@@ -30,13 +34,14 @@ public:
 
     void set(QString date, bool isShow, bool isWeekend, bool isToday);
     void reset();
-    void addDayItem(QString title, int type);
-
+    void addDayItem(QList<QHash<QString,QString>> dayItems);
 private:
     Ui::Calendar_day *ui;
 
     QString title;
     QVector<DayItemClass> items;
+
+    void renderLabel(QLabel *label, DayItemClass dayItem);
 };
 
 

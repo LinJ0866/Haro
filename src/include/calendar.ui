@@ -33,7 +33,7 @@
     <number>10</number>
    </property>
    <item>
-    <layout class="QHBoxLayout" name="menu">
+    <layout class="QHBoxLayout" name="menu" stretch="0,0,0,0,0,0,0,0,0">
      <property name="topMargin">
       <number>10</number>
      </property>
@@ -61,6 +61,22 @@
       </widget>
      </item>
      <item>
+      <spacer name="horizontalSpacer_4">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
       <widget class="QLabel" name="monthLabel">
        <property name="autoFillBackground">
         <bool>false</bool>
@@ -75,6 +91,22 @@ color: rgb(0, 0, 0);</string>
       </widget>
      </item>
      <item>
+      <spacer name="horizontalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
       <widget class="QLabel" name="yearLabel">
        <property name="autoFillBackground">
         <bool>false</bool>
@@ -87,6 +119,22 @@ color: rgb(0, 0, 0);</string>
         <string>20XX年</string>
        </property>
       </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_5">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
      <item>
       <widget class="QPushButton" name="pushButton_2">
@@ -122,7 +170,7 @@ color: rgb(0, 0, 0);</string>
     </widget>
    </item>
    <item>
-    <layout class="QGridLayout" name="month" rowstretch="1,3,3,3,3,3,3,0">
+    <layout class="QGridLayout" name="month" rowstretch="1,3,3,3,3,3,3">
      <property name="topMargin">
       <number>0</number>
      </property>
