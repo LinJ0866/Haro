@@ -49,17 +49,24 @@ private:
     int earMoveIdx = 0;
     int eyeMoveIdx = 0;
     int eyeMoveKind = -1;
+    int tempEyeMoveIdx;
+    int tempEyeMoveKind;
     int eyeMoveMax = -1;
     int eyeErrorIdx = 0;
     int eyeTextIdx = 0;
     QString eyeTextContent;
 
+    QHash<QString,QString> timelineItem;
+
     int strideThreshold = 170;
     int EAR_SWITCH_MAX_COUNT = 40;
     int draggingCount = 0; // 拖动抖动
 
-    QTimer *timer;//定时器
+    QTimer *timer, *timer1s;//定时器
+    int secondCount = 0;
+    QString eyeClockText = "--:--";
 
+    const int btnNum = 7;
     QList<QPushButton*> btns;
     const QList<int> menuBtnIdxs = {4,2,1,3};
     int btnStatus=0; //按钮显示状态  0：主菜单隐藏 1：主菜单显示
@@ -71,6 +78,7 @@ private:
 
     void earsMovement();
     void eyesMovement();
+    void clockInterrupt();
 
     void bindTimerSlots();
     void bindSlots();
@@ -88,6 +96,13 @@ private:
     void minBtnPush();//点击最小化按钮事件
     void setBtnPush();//点击设置按钮事件
     void TimeBoardBtnPush();
+    void timeLineStartPush();
+    void timeLineEndPush();
+
+    void timeLineCheckUnfinishedId();
+    void timeLineCreate(int workType, QString workDesc);
+    void timeLineUpdate();
+    void timeLineEnd(int workScore);
 
     void loadConfigData(); // 加载config数据
     void updateConfigData(QString key, int value); // 存储config数据
@@ -101,6 +116,8 @@ private slots:
 public:
     Haro(QWidget *parent = nullptr);
     ~Haro();  
+
+    void sendText(QString text);
 };
 
 #endif // HARO_H

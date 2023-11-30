@@ -25,6 +25,7 @@ Haro::Haro(QWidget *parent)
     earsImage = new QLabel(this);//耳朵图片指针
 
     timer = new QTimer;
+    timer1s = new QTimer();
 
     // 读取数据库
     db->connect();
@@ -50,6 +51,7 @@ Haro::Haro(QWidget *parent)
     bindTimerSlots();
     bindSlots();
     timer->start(40);//动画速度
+    timer1s->setInterval(1000);
 }
 
 Haro::~Haro()
@@ -68,6 +70,7 @@ void Haro::bindTimerSlots()
 {
     connect(this->timer, &QTimer::timeout, this, &Haro::earsMovement);
     connect(this->timer, &QTimer::timeout, this, &Haro::eyesMovement);
+    connect(this->timer1s, &QTimer::timeout, this, &Haro::clockInterrupt);
 }
 
 void Haro::bindSlots()
@@ -77,6 +80,9 @@ void Haro::bindSlots()
     connect(systray, SIGNAL(displaySignal()), this, SLOT(restoreWindows()));
     connect(dressWindow, SIGNAL(dressSignal(QString, int)), this, SLOT(updateDressing(QString, int)));
     connect(setWindow, SIGNAL(sizeSignal(int)), this, SLOT(updateSize(int)));
+    for (int i = 0; i<btnNum; i++) {
+        connect(btns[i], &QPushButton::clicked, this, &Haro::onBtnsClick);
+    }
 }
 
 void Haro::earsMovement()
@@ -126,12 +132,13 @@ void Haro::eyesMovement()
         }
     } else if(eyeMoveKind == -2) {
         // 时间
+        // 脸部渲染
         eyesImage->resize(windowSize,windowSize);
         eyesImage->setAlignment(Qt::AlignCenter);
         eyesImage->setStyleSheet(QString("color: rgb(63,72,204); font: %1px;").arg(windowSize/4));
         eyesImage->move(this->frameGeometry().width()/2 - windowSize/2,
                         this->frameGeometry().height()/2 - windowSize/2.1);
-        eyesImage->setText("11:09");
+        eyesImage->setText(eyeClockText);
     } else if(eyeMoveKind == -3) {
         // 文字跑马灯
         eyesImage->resize(windowSize,windowSize);
@@ -146,9 +153,10 @@ void Haro::eyesMovement()
 
         if (eyeMoveIdx == 60+(eyeTextContent.length()-2)*3) {
             eyeTextIdx = 0;
-            eyeMoveIdx = 0;
             eyeTextContent = "";
-            eyeMoveKind = -1;
+            // 复原
+            eyeMoveKind = tempEyeMoveKind;
+            eyeMoveIdx = tempEyeMoveIdx;
             return;
         }
         eyeMoveIdx++;
@@ -161,23 +169,46 @@ void Haro::eyesMovement()
     }
 }
 
+QString convertSecond2TimeStr(int second) {
+    int hour = second / 3600;
+    int min = (second / 60)%60;
+    int sec = second % 60;
+    if (hour == 24) {
+        // 停止
+    }
+    // 一小时内，显示为分：秒
+    if (hour == 0) {
+        return QString("%1%2%3").arg(min,2,10,QLatin1Char('0')).arg(second%2?" ":":").arg(sec,2,10,QLatin1Char('0'));
+    } else {
+        // 显示为小时：分钟
+        return QString("%1%2%3").arg(hour,2,10,QLatin1Char('0')).arg(second%2?" ":":").arg(min,2,10,QLatin1Char('0'));
+    }
+}
+
+void Haro::clockInterrupt() {
+    secondCount++;
+    eyeClockText = convertSecond2TimeStr(secondCount);
+}
+
+//void Haro::
 
 void Haro::initBtn()
 {
     // 创建按钮对象
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 7; i++) {
         btns<<new QPushButton(this);
     }
 
     // 固定按钮加载
-    btns[0]->setIcon(QIcon(":/assets/icons/close.png"));
+    btns[0]->setIcon(QIcon(HaroIcon::getIcon(HaroIcon::IconName::Close)));
     btns[0]->setObjectName("m001");
     btns[0]->setToolTip("退出");
-    btns[5]->setIcon(QIcon(":/assets/icons/more.png"));
+    btns[5]->setIcon(QIcon(HaroIcon::getIcon(HaroIcon::IconName::More)));
     btns[5]->setObjectName("m002");
     btns[5]->setToolTip("更多（开发中）");
-    connect(btns[0], &QPushButton::clicked, this, &Haro::onBtnsClick);
-    connect(btns[5], &QPushButton::clicked, this, &Haro::onBtnsClick);
+    btns[6]->setIcon(QIcon(HaroIcon::getIcon(HaroIcon::IconName::Management)));
+    btns[6]->setObjectName("m203");
+    btns[6]->setToolTip("停止时光机");
 }
 void Haro::renderBtn() {
     QString stableStyle = {
@@ -197,20 +228,58 @@ void Haro::renderBtn() {
     int btnY_relative[5] = {0, int(-btnSize*0.2), int(-btnSize*0.2), int(-btnSize*0.8), int(-btnSize*0.8)};
     QSize iconsize(btnSize/2,btnSize/2);
 
-    // 关闭按钮
-    btns[0]->setStyleSheet(stableStyleClose.arg(btnSize/10).arg(btnSize/2));
-    btns[0]->setGeometry(this->frameGeometry().width()/2+windowSize/2,this->frameGeometry().height()/2-windowSize/1.7,btnSize,btnSize);
-    btns[0]->setIconSize(iconsize);
-    btns[0]->setVisible(btnStatus%2);
-
     // 主菜单
     if (btnStatus < 2) {
+        btns[6]->setVisible(false);
+        // 关闭按钮
+        btns[0]->setStyleSheet(stableStyleClose.arg(btnSize/10).arg(btnSize/2));
+        btns[0]->setGeometry(this->frameGeometry().width()/2+windowSize/2,this->frameGeometry().height()/2-windowSize/1.7,btnSize,btnSize);
+        btns[0]->setIconSize(iconsize);
+        btns[0]->setVisible(btnStatus%2);
+
         for (int i = 1; i < 6; i++) {
             btns[i]->setStyleSheet(stableStyle.arg(btnSize/10).arg(btnSize/2));
             btns[i]->setGeometry(btnX+btnX_relative[i-1], btnY+btnY_relative[i-1], btnSize, btnSize);
             btns[i]->setIconSize(iconsize);
             btns[i]->setVisible(btnStatus%2);
         }
+    } else if (btnStatus < 4) {
+        // 专注模式
+        for (int i = 0; i < 6; i++) {
+            btns[i]->setVisible(false);
+        }
+        btns[6]->setStyleSheet(stableStyle.arg(btnSize/10).arg(btnSize/2));
+        btns[6]->setGeometry(btnX+btnX_relative[0], btnY+btnY_relative[0], btnSize, btnSize);
+        btns[6]->setIconSize(iconsize);
+        btns[6]->setVisible(btnStatus%2);
+    }
+}
+
+// 动态按钮响应
+void Haro::onBtnsClick() {
+    QPushButton* btn = static_cast<QPushButton*>(QObject::sender());
+    QString btn_name = btn->objectName();
+
+    if (btn_name == "m001") {
+        this->closeBtnPush();
+    } else if(btn_name == "m101") {
+        this->dressBtnPush();
+    } else if (btn_name == "m102") {
+        this->setBtnPush();
+    } else if (btn_name == "m103") {
+        this->minBtnPush();
+    } else if (btn_name == "m201") {
+        // 开启专注模式
+        this->timeLineStartPush();
+    } else if (btn_name == "m202") {
+        // 打开时光看板
+        this->TimeBoardBtnPush();
+    } else if (btn_name == "m203") {
+        // 关闭专注模式
+        this->timeLineEndPush();
+    }
+    else {
+        systray->sendNotification(btn->toolTip(), "功能开发中");
     }
 }
 
@@ -249,26 +318,6 @@ void Haro::HaroUiUpdate(QLabel *image, QString imageUrl, bool isInit)
 void Haro::restoreWindows() {
     if (this->isHidden()) {
         this->show();
-    }
-}
-
-// 动态按钮响应
-void Haro::onBtnsClick() {
-    QPushButton* btn = static_cast<QPushButton*>(QObject::sender());
-    QString btn_name = btn->objectName();
-
-    if (btn_name == "m001") {
-        this->closeBtnPush();
-    } else if(btn_name == "m101") {
-        this->dressBtnPush();
-    } else if (btn_name == "m102") {
-        this->setBtnPush();
-    } else if (btn_name == "m103") {
-        this->minBtnPush();
-    } else if (btn_name == "m202") {
-        this->TimeBoardBtnPush();
-    } else {
-        systray->sendNotification(btn->toolTip(), "功能开发中");
     }
 }
 
@@ -323,6 +372,26 @@ void Haro::TimeBoardBtnPush() {
     calendar->render();
     calendar->show();
 }
+
+void Haro::timeLineStartPush() {
+    eyeMoveKind = -2;
+    timer1s->start();
+    // 开始时输入工作类型与内容
+    systray->sendNotification("时光机", "专注模式已开启，加油~");
+    this->btnStatus = 2;
+    this->renderBtn();
+}
+
+void Haro::timeLineEndPush() {
+    timer1s->stop();
+    // TODO: save
+    secondCount = 0;
+    eyeClockText = "--:--";
+    eyeMoveKind = Movement::MovementKind::Blink;
+    eyeMoveIdx = 8;
+    this->btnStatus = 0;
+    this->renderBtn();
+}
 //void Haro::gameBtnPush()
 //{
 //    //隐藏所有窗口
@@ -350,7 +419,8 @@ void Haro::mouseMoveEvent(QMouseEvent *event)
         draggingCount += 1;
         // 处理阈值
         if (draggingCount > 10) {
-            if (draggingCount == 11) {
+            // 大于-2是为了当haro处于时间与文字跑马灯时不进入飞翔动画
+            if (draggingCount == 11 && eyeMoveKind > -2) {
                 eyeMoveIdx = 0;
                 eyeMoveKind = Movement::MovementKind::Fly;
                 // 拖动时收起按钮
@@ -386,19 +456,19 @@ void Haro::mouseReleaseEvent(QMouseEvent *event)
 
     //鼠标左键事件,切换表情
     if(event->button() == Qt::LeftButton) {
-        if (eyeMoveKind < 0){//随机播放表情
-            eyeMoveKind = qrand()%(Movement::movementNum);
-            eyeErrorIdx++;
-            if(eyeErrorIdx==10){//触发蓝屏
-                eyeErrorIdx = 0;
-                eyeMoveKind = 11;
-            }
+        if (eyeMoveKind == -1){//随机播放表情
+            sendText("软件工程课要开始了");
+//            eyeMoveKind = qrand()%(Movement::movementNum);
+//            eyeErrorIdx++;
+//            if(eyeErrorIdx==10){//触发蓝屏
+//                eyeErrorIdx = 0;
+//                eyeMoveKind = 11;
+//            }
         }
     } else if (event->button() == Qt::RightButton){ //鼠标右键事件
         this->hideMenuBtns(1);
     }
 }
-
 
 void Haro::loadConfigData() {
     QHash<QString,QString> configData;
@@ -428,7 +498,6 @@ void Haro::loadConfigData() {
         btns[menuBtnIdxs[i]]->setObjectName("m"+btnData["function_id"]);
         btns[menuBtnIdxs[i]]->setIcon(QIcon(btnData["icon_url"]));
         btns[menuBtnIdxs[i]]->setToolTip(btnData["name"]);
-        connect(btns[menuBtnIdxs[i]], &QPushButton::clicked, this, &Haro::onBtnsClick);
     }
 
     return;
@@ -469,4 +538,39 @@ void Haro::updateSize(int value) {
     updateConfigData("window_size", value);
 
     renderBtn();
+}
+
+// 时光机
+void Haro::timeLineCheckUnfinishedId() {
+    timelineItem.clear();
+    db->getData("timelines", timelineItem, "where is_delete=0 and is_end=0");
+    if (!timelineItem.empty()) {
+        timelineItem["is_end"] = "1";
+        timelineItem["score"] = "0";
+        db->updateData("timelines", timelineItem, QString("where t_id==%1").arg(timelineItem["t_id"]));
+    }
+}
+
+void Haro::timeLineCreate(int workType, QString workDesc) {
+    // TODO:存时间戳
+    timelineItem.clear();
+//    timelineItem["year"] =
+//    db->addData()
+}
+void Haro::timeLineUpdate() {
+
+}
+void Haro::timeLineEnd(int workScore) {
+
+}
+
+// 何时
+void Haro::sendText(QString text) {
+    tempEyeMoveIdx = eyeMoveIdx;
+    tempEyeMoveKind = eyeMoveKind;
+    eyeTextIdx = 0;
+    eyeTextContent = text;
+    eyeMoveIdx = 0;
+    eyeMoveKind = -3;
+    systray->sendNotification("何时", text);
 }
